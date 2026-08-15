@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#7c3aed">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="G11D.ai">
+<title>G11D.ai — Ultimate AI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{
+  --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;--border:#2a2a3d;
+  --accent:#7c3aed;--accent2:#06b6d4;--green:#10b981;--red:#ef4444;--amber:#f59e0b;
+  --text:#e2e8f0;--text-dim:#64748b;--text-hi:#f8fafc;
+  --bai:#1e1e2e;--buser:#2d1b69;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;display:flex;flex-direction:column;height:100dvh;}
+body::before{content:'';position:fixed;top:-40%;left:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(124,58,237,0.1) 0%,transparent 70%);pointer-events:none;z-index:0;animation:drift 8s ease-in-out infinite alternate;}
+@keyframes drift{from{transform:translate(0,0)}to{transform:translate(30px,20px)}}
+@keyframes orbP{0%,100%{box-shadow:0 0 14px rgba(124,58,237,0.4);}50%{box-shadow:0 0 26px rgba(124,58,237,0.7),0 0 44px rgba(6,182,212,0.3);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes tDot{0%,80%,100%{transform:scale(0.7);opacity:0.4}40%{transform:scale(1);opacity:1}}
+@keyframes vP{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+@keyframes rRing{0%{box-shadow:0 0 0 0 rgba(239,68,68,0.5);}100%{box-shadow:0 0 0 12px rgba(239,68,68,0);}}
+@keyframes wave{0%,100%{transform:scaleY(0.4)}50%{transform:scaleY(1)}}
+@keyframes memFlash{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes slideIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:none}}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;gap:8px;padding:9px 13px;background:rgba(18,18,26,0.96);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;z-index:10;}
+.logo-orb{width:31px;height:31px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 13px rgba(124,58,237,0.4);animation:orbP 3s ease-in-out infinite;}
+.logo-text{font-size:17px;font-weight:900;letter-spacing:1px;background:linear-gradient(135deg,#a78bfa,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:8px;color:var(--text-dim);font-weight:700;letter-spacing:0.5px;}
+.clock-wrap{display:flex;flex-direction:column;align-items:center;margin:0 4px;}
+.clock-t{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent2);letter-spacing:1px;}
+.clock-d{font-size:8px;color:var(--text-dim);}
+.topbar-right{margin-left:auto;display:flex;gap:5px;align-items:center;}
+.tbtn{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:10px;color:var(--text-dim);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;transition:all 0.2s;white-space:nowrap;}
+.tbtn:hover{border-color:var(--accent);color:var(--accent);}
+.mem-badge{display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:10px;font-size:9px;font-weight:700;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);color:#a78bfa;cursor:pointer;}
+.mem-dot{width:5px;height:5px;border-radius:50%;background:#a78bfa;animation:memFlash 2s infinite;}
+.online-dot-wrap{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:9px;font-weight:700;white-space:nowrap;}
+.online-dot-wrap.on{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:var(--green);}
+.online-dot-wrap.off{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:var(--red);}
+.od{width:5px;height:5px;border-radius:50%;background:currentColor;animation:pulse 2s infinite;}
+
+/* CHIPS */
+.chips{display:flex;gap:5px;overflow-x:auto;padding:7px 12px;flex-shrink:0;border-bottom:1px solid var(--border);background:rgba(18,18,26,0.7);scrollbar-width:none;z-index:5;position:relative;}
+.chips::-webkit-scrollbar{display:none;}
+.chip{display:inline-flex;align-items:center;gap:3px;white-space:nowrap;padding:4px 10px;border-radius:16px;border:1px solid var(--border);background:var(--bg3);font-size:10px;font-weight:700;color:var(--text-dim);cursor:pointer;transition:all 0.2s;flex-shrink:0;}
+.chip:hover{border-color:var(--accent);color:var(--accent);}
+.chip.active{border-color:var(--accent);color:var(--accent);background:rgba(124,58,237,0.1);}
+
+/* MESSAGES */
+.messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1;}
+.messages::-webkit-scrollbar{width:3px;}
+.messages::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* WELCOME */
+.welcome{text-align:center;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:9px;}
+.w-orb{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 0 34px rgba(124,58,237,0.5);animation:orbP 3s ease-in-out infinite;}
+.w-title{font-size:19px;font-weight:900;color:var(--text-hi);}
+.w-dt{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);border-radius:6px;padding:4px 12px;}
+.w-sub{font-size:11px;color:var(--text-dim);line-height:1.6;max-width:320px;}
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;max-width:420px;}
+.qcard{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 7px;cursor:pointer;transition:all 0.2s;text-align:center;}
+.qcard:hover{border-color:var(--accent);background:rgba(124,58,237,0.06);transform:translateY(-1px);}
+.qcard-i{font-size:18px;margin-bottom:3px;}
+.qcard-t{font-size:10px;font-weight:800;color:var(--text-hi);}
+.qcard-s{font-size:9px;color:var(--text-dim);}
+
+/* MEMORY PANEL */
+.mem-panel{position:fixed;top:0;right:0;width:300px;height:100%;background:var(--bg2);border-left:1px solid var(--border);z-index:50;display:none;flex-direction:column;animation:slideIn 0.25s ease;}
+.mem-panel.open{display:flex;}
+.mem-header{padding:14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.mem-title{font-size:14px;font-weight:900;color:var(--text-hi);flex:1;}
+.mem-close{background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;}
+.mem-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
+.mem-body::-webkit-scrollbar{width:3px;}
+.mem-section{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;}
+.mem-sec-title{font-size:9px;font-weight:800;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.mem-item{font-size:11px;color:var(--text);padding:4px 0;border-bottom:1px solid rgba(42,42,61,0.5);line-height:1.4;}
+.mem-item:last-child{border-bottom:none;}
+.mem-item strong{color:var(--accent2);}
+.mem-clear-btn{margin:10px;padding:8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:7px;color:var(--red);font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;cursor:pointer;}
+.mem-count{font-size:8px;background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.2);color:#a78bfa;border-radius:8px;padding:1px 6px;font-weight:700;}
+
+/* BOOKING CARD */
+.booking-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px;margin-top:8px;display:flex;flex-direction:column;gap:7px;}
+.booking-title{font-size:12px;font-weight:800;color:var(--text-hi);display:flex;align-items:center;gap:6px;}
+.booking-links{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px;}
+.book-btn{padding:5px 11px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid;transition:all 0.2s;text-decoration:none;display:inline-block;font-family:'Nunito',sans-serif;}
+.book-btn:hover{transform:translateY(-1px);}
+.book-btn.primary{background:rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.3);color:#a78bfa;}
+.book-btn.green{background:rgba(16,185,129,0.12);border-color:rgba(16,185,129,0.25);color:var(--green);}
+.book-btn.blue{background:rgba(6,182,212,0.1);border-color:rgba(6,182,212,0.2);color:var(--accent2);}
+.book-btn.amber{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.2);color:var(--amber);}
+.book-note{font-size:9px;color:var(--text-dim);}
+
+/* MSG */
+.msg{display:flex;gap:8px;max-width:90%;animation:msgIn 0.3s ease;}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.msg.ai{align-self:flex-start;}
+.msg-av{width:27px;height:27px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.msg.ai .msg-av{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 0 8px rgba(124,58,237,0.3);}
+.msg.user .msg-av{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;}
+.msg-body{display:flex;flex-direction:column;gap:2px;max-width:calc(100% - 35px);}
+.msg-name{font-size:9px;font-weight:700;color:var(--text-dim);padding:0 3px;}
+.msg.user .msg-name{text-align:right;}
+.bubble{padding:9px 12px;border-radius:11px;font-size:12px;line-height:1.65;}
+.msg.ai .bubble{background:var(--bai);border:1px solid var(--border);color:var(--text);border-top-left-radius:2px;}
+.msg.user .bubble{background:var(--buser);border:1px solid rgba(124,58,237,0.25);color:var(--text-hi);border-top-right-radius:2px;}
+.bubble strong{color:var(--text-hi);}
+.bubble code{font-family:'JetBrains Mono',monospace;background:rgba(124,58,237,0.13);padding:1px 5px;border-radius:3px;font-size:11px;color:#a78bfa;}
+.bubble pre{background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;padding:9px;margin-top:6px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:#7dd3fc;line-height:1.5;}
+.bubble ul,.bubble ol{padding-left:15px;margin-top:3px;}
+.bubble li{margin-bottom:2px;}
+.bubble h3{color:var(--text-hi);margin:7px 0 3px;font-size:13px;}
+.msg-time{font-size:8px;color:var(--text-dim);padding:0 3px;font-family:'JetBrains Mono',monospace;}
+.msg.user .msg-time{text-align:right;}
+
+/* MEM INDICATOR */
+.mem-saved-badge{display:inline-flex;align-items:center;gap:3px;font-size:8px;color:#a78bfa;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.15);border-radius:4px;padding:1px 5px;margin-top:2px;}
+
+/* DATE DIV */
+.date-div{text-align:center;margin:2px 0;}
+.date-div span{font-size:9px;color:var(--text-dim);background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:2px 10px;}
+
+/* TYPING */
+.typing{display:flex;gap:4px;align-items:center;padding:9px 12px;}
+.td{width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));animation:tDot 1.2s infinite;}
+.td:nth-child(2){animation-delay:0.15s;}.td:nth-child(3){animation-delay:0.3s;}
+
+/* INPUT */
+.input-area{padding:8px 12px 12px;background:rgba(18,18,26,0.96);border-top:1px solid var(--border);flex-shrink:0;z-index:10;position:relative;}
+.vs-bar{display:none;align-items:center;gap:6px;padding:5px 10px;margin-bottom:6px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:7px;font-size:10px;color:#fca5a5;font-weight:700;}
+.vs-bar.active{display:flex;}
+.vdot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:vP 1s infinite;}
+.vwaves{display:flex;gap:2px;align-items:center;height:12px;}
+.vw{width:2px;background:var(--red);border-radius:2px;animation:wave 0.8s ease-in-out infinite;}
+.vw:nth-child(1){height:4px}.vw:nth-child(2){height:9px;animation-delay:.1s}.vw:nth-child(3){height:6px;animation-delay:.2s}.vw:nth-child(4){height:11px;animation-delay:.3s}.vw:nth-child(5){height:4px;animation-delay:.4s}
+.vstop{margin-left:auto;background:rgba(239,68,68,0.13);border:1px solid rgba(239,68,68,0.25);border-radius:4px;padding:2px 7px;color:#fca5a5;font-size:9px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;}
+.irow{display:flex;gap:6px;align-items:flex-end;background:var(--bg3);border:1.5px solid var(--border);border-radius:12px;padding:7px 11px;transition:border-color 0.2s,box-shadow 0.2s;}
+.irow:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px rgba(124,58,237,0.1);}
+.ibtn{background:none;border:none;font-size:16px;cursor:pointer;opacity:0.45;transition:all 0.2s;padding:2px;flex-shrink:0;}
+.ibtn:hover{opacity:1;}
+.ibtn.rec{opacity:1;animation:rRing 1s ease-out infinite,vP 0.8s infinite;}
+textarea#inp{flex:1;background:none;border:none;outline:none;color:var(--text-hi);font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;resize:none;line-height:1.5;max-height:100px;caret-color:var(--accent);}
+textarea#inp::placeholder{color:var(--text-dim);}
+.sbtn{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 0 10px rgba(124,58,237,0.3);transition:all 0.2s;flex-shrink:0;color:#fff;}
+.sbtn:hover{transform:scale(1.06);box-shadow:0 0 18px rgba(124,58,237,0.5);}
+.sbtn:disabled{opacity:0.3;cursor:not-allowed;transform:none;}
+.ifooter{display:flex;justify-content:center;margin-top:5px;font-size:9px;color:var(--text-dim);font-weight:600;}
+
+/* INSTALL */
+.install-bar{display:none;align-items:center;gap:7px;padding:7px 11px;margin-bottom:6px;background:linear-gradient(135deg,rgba(124,58,237,0.1),rgba(6,182,212,0.06));border:1px solid rgba(124,58,237,0.2);border-radius:8px;font-size:11px;color:var(--text-hi);font-weight:700;}
+.install-bar.show{display:flex;}
+.inst-btn{margin-left:auto;background:var(--accent);border:none;border-radius:5px;padding:4px 10px;color:#fff;font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;}
+.cx{background:none;border:none;color:var(--text-dim);font-size:14px;cursor:pointer;}
+
+/* TOAST */
+.toast{position:fixed;bottom:68px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--bg2);border:1px solid var(--accent);border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;color:var(--accent);z-index:200;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;max-width:92vw;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* LANG MODAL */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,0.78);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px;}
+.mbg.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:18px;width:100%;max-width:440px;max-height:80vh;overflow-y:auto;}
+.modal-t{font-size:15px;font-weight:900;color:var(--text-hi);margin-bottom:3px;}
+.modal-s{font-size:10px;color:var(--text-dim);margin-bottom:11px;}
+.lgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.lopt{padding:8px 5px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);text-align:center;cursor:pointer;font-size:10px;font-weight:700;color:var(--text-dim);transition:all 0.15s;}
+.lopt:hover{border-color:var(--accent);color:var(--accent);}
+.fl{font-size:16px;display:block;margin-bottom:2px;}
+.mcbtn{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--text);font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;cursor:pointer;margin-top:10px;}
+
+@media(max-width:480px){.msg{max-width:96%;}.lgrid{grid-template-columns:repeat(2,1fr);}.quick-grid{grid-template-columns:repeat(3,1fr);}.clock-d{display:none;}.mem-panel{width:100%;}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:7px;">
+    <div class="logo-orb">🧠</div>
+    <div><div class="logo-text">G11D.ai</div><div class="logo-sub">ULTIMATE AI · ALL-IN-ONE</div></div>
+  </div>
+  <div class="clock-wrap" style="margin-left:8px;">
+    <div class="clock-t" id="ct">--:--:--</div>
+    <div class="clock-d" id="cd"></div>
+  </div>
+  <div class="topbar-right">
+    <div class="online-dot-wrap on" id="netStatus"><div class="od"></div><span id="netTxt">ONLINE</span></div>
+    <div class="mem-badge" onclick="openMem()" title="Memory"><div class="mem-dot"></div>🧠 <span id="memCount">0</span></div>
+    <button class="tbtn" onclick="openLang()">🌍</button>
+  </div>
+</div>
+
+<!-- CHIPS -->
+<div class="chips">
+  <div class="chip active" onclick="setMode('general',this)">🌟 All</div>
+  <div class="chip" onclick="setMode('booking',this)">🏨 Booking</div>
+  <div class="chip" onclick="setMode('travel',this)">✈️ Travel</div>
+  <div class="chip" onclick="setMode('food',this)">🍽️ Food</div>
+  <div class="chip" onclick="setMode('security',this)">🛡️ Security</div>
+  <div class="chip" onclick="setMode('health',this)">🏃 Health</div>
+  <div class="chip" onclick="setMode('study',this)">📚 Study</div>
+  <div class="chip" onclick="setMode('work',this)">💼 Work</div>
+  <div class="chip" onclick="setMode('finance',this)">💰 Finance</div>
+  <div class="chip" onclick="setMode('entertainment',this)">🎬 Fun</div>
+  <div class="chip" onclick="setMode('local',this)">📍 Near Me</div>
+  <div class="chip" onclick="setMode('morning',this)">☀️ Morning</div>
+  <div class="chip" onclick="setMode('night',this)">🌙 Night</div>
+</div>
+
+<!-- MESSAGES -->
+<div class="messages" id="msgs">
+  <div class="welcome" id="welcome">
+    <div class="w-orb">🧠</div>
+    <div class="w-title">Namaste! G11D Ultimate AI 🙏</div>
+    <div class="w-dt" id="wdt">📅 Loading...</div>
+    <div class="w-sub">
+      Sakali uthlyapasun raatri jhopeparyant — har kaam mein saath!<br>
+      <strong style="color:#a78bfa;">Memory ON</strong> — tumchya gosta yaad ratilaas 🧠<br>
+      Hotel, Train, Bus, Movie, Flight — <strong>sab book hoel!</strong>
+    </div>
+    <div class="quick-grid">
+      <div class="qcard" onclick="quickAsk('Maza sathi hotel book kara 🏨')"><div class="qcard-i">🏨</div><div class="qcard-t">Hotel</div><div class="qcard-s">Book now</div></div>
+      <div class="qcard" onclick="quickAsk('Train ticket book kara maza sathi 🚆')"><div class="qcard-i">🚆</div><div class="qcard-t">Train</div><div class="qcard-s">Book ticket</div></div>
+      <div class="qcard" onclick="quickAsk('Flight book kara maza sathi ✈️')"><div class="qcard-i">✈️</div><div class="qcard-t">Flight</div><div class="qcard-s">Best deals</div></div>
+      <div class="qcard" onclick="quickAsk('Bus ticket book kara 🚌')"><div class="qcard-i">🚌</div><div class="qcard-t">Bus</div><div class="qcard-s">Redbus etc</div></div>
+      <div class="qcard" onclick="quickAsk('Movie ticket book kara 🎬')"><div class="qcard-i">🎬</div><div class="qcard-t">Movie</div><div class="qcard-s">BookMyShow</div></div>
+      <div class="qcard" onclick="quickAsk('Mazya paas kay kay aahe navin? Aaspass show, events saang 📍')"><div class="qcard-i">📍</div><div class="qcard-t">Near Me</div><div class="qcard-s">Scan area</div></div>
+      <div class="qcard" onclick="quickAsk('Bug hunting madhe help kara 🎯')"><div class="qcard-i">🛡️</div><div class="qcard-t">Security</div><div class="qcard-s">Bug hunting</div></div>
+      <div class="qcard" onclick="quickAsk('Aaj din plan kara maza sathi ☀️')"><div class="qcard-i">☀️</div><div class="qcard-t">Day Plan</div><div class="qcard-s">Morning plan</div></div>
+      <div class="qcard" onclick="quickAsk('Entertainment ticket book kara — concert ya event 🎪')"><div class="qcard-i">🎪</div><div class="qcard-t">Events</div><div class="qcard-s">Concerts etc</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MEMORY PANEL -->
+<div class="mem-panel" id="memPanel">
+  <div class="mem-header">
+    <span style="font-size:16px;">🧠</span>
+    <div class="mem-title">G11D Memory</div>
+    <span class="mem-count" id="memPanelCount">0 memories</span>
+    <button class="mem-close" onclick="closeMem()">✕</button>
+  </div>
+  <div class="mem-body" id="memBody">
+    <div style="font-size:11px;color:var(--text-dim);text-align:center;padding:20px;">No memories yet.<br>Chat kara — mee yaad thevto! 🧠</div>
+  </div>
+  <button class="mem-clear-btn" onclick="clearMemory()">🗑️ Sari Memory Clear Kara</button>
+</div>
+
+<!-- INPUT -->
+<div class="input-area">
+  <div class="install-bar" id="instBar">
+    📱 Phone var install kara!
+    <button class="inst-btn" onclick="installPWA()">Install</button>
+    <button class="cx" onclick="this.parentElement.classList.remove('show')">✕</button>
+  </div>
+  <div class="vs-bar" id="vsBar">
+    <div class="vdot"></div>
+    <div class="vwaves"><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div></div>
+    <span id="vsTxt">Bola... 👂</span>
+    <button class="vstop" onclick="stopVoice()">■ Stop</button>
+  </div>
+  <div class="irow">
+    <button class="ibtn" onclick="getLocationAndAsk()" title="Location">📍</button>
+    <button class="ibtn" id="micBtn" onclick="toggleVoice()">🎤</button>
+    <textarea id="inp" rows="1" placeholder="Hotel, Train, Movie, kahi pan — Marathi/Hindi/English..." onkeydown="hKey(event)" oninput="aResize(this)"></textarea>
+    <button class="sbtn" id="sbtn" onclick="send()">➤</button>
+  </div>
+  <div class="ifooter">G11D.ai · Memory ON 🧠 · Booking · Location · Voice · 100+ Languages 🙏</div>
+</div>
+
+<!-- LANG MODAL -->
+<div class="mbg" id="langModal">
+  <div class="modal">
+    <div class="modal-t">🌍 Bhasha Nivda</div>
+    <div class="modal-s">Tumchi bhasha — tych bhashet boltoo!</div>
+    <div class="lgrid">
+      <div class="lopt" onclick="sLang('मराठी','mr','mr-IN')"><span class="fl">🇮🇳</span>मराठी</div>
+      <div class="lopt" onclick="sLang('हिंदी','hi','hi-IN')"><span class="fl">🇮🇳</span>हिंदी</div>
+      <div class="lopt" onclick="sLang('English','en','en-US')"><span class="fl">🇺🇸</span>English</div>
+      <div class="lopt" onclick="sLang('বাংলা','bn','bn-BD')"><span class="fl">🇧🇩</span>বাংলা</div>
+      <div class="lopt" onclick="sLang('தமிழ்','ta','ta-IN')"><span class="fl">🇮🇳</span>தமிழ்</div>
+      <div class="lopt" onclick="sLang('తెలుగు','te','te-IN')"><span class="fl">🇮🇳</span>తెలుగు</div>
+      <div class="lopt" onclick="sLang('ગુજરાતી','gu','gu-IN')"><span class="fl">🇮🇳</span>ગુજરાતી</div>
+      <div class="lopt" onclick="sLang('ਪੰਜਾਬੀ','pa','pa-IN')"><span class="fl">🇮🇳</span>ਪੰਜਾਬੀ</div>
+      <div class="lopt" onclick="sLang('العربية','ar','ar-SA')"><span class="fl">🇸🇦</span>العربية</div>
+      <div class="lopt" onclick="sLang('Español','es','es-ES')"><span class="fl">🇪🇸</span>Español</div>
+      <div class="lopt" onclick="sLang('Français','fr','fr-FR')"><span class="fl">🇫🇷</span>Français</div>
+      <div class="lopt" onclick="sLang('日本語','ja','ja-JP')"><span class="fl">🇯🇵</span>日本語</div>
+    </div>
+    <div style="text-align:right;"><button class="mcbtn" onclick="closeLang()">Close ✕</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ CLOCK ══
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function getDT(){
+  const d=new Date(),p=n=>String(n).padStart(2,'0');
+  return{time:`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`,date:`${DAYS[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`,h:d.getHours(),d};
+}
+function greeting(h){return h<5?'Good Night 🌙':h<12?'Subh Sakal ☀️':h<17?'Afternoon 🌤️':h<20?'Evening 🌇':'Good Night 🌙';}
+function tick(){
+  const{time,date,h}=getDT();
+  document.getElementById('ct').textContent=time;
+  document.getElementById('cd').textContent=date;
+  const w=document.getElementById('wdt');
+  if(w)w.textContent=`📅 ${date}  ·  🕐 ${time}  ·  ${greeting(h)}`;
+}
+tick();setInterval(tick,1000);
+
+// ══ PERSISTENT MEMORY (localStorage) ══
+const MEM_KEY='g11d_memory_v2';
+let MEM={
+  user:{name:'',location:'',language:'',preferences:[],bookedServices:[]},
+  conversations:[],  // last 50 messages summary
+  bookings:[],       // hotel, train, flight, bus, movie records
+  history:[],        // full chat history (last 30)
+  facts:[],          // important facts user told
+  lastSeen:'',
+};
+
+function loadMem(){
+  try{const s=localStorage.getItem(MEM_KEY);if(s)MEM=JSON.parse(s);}
+  catch(e){console.log('Memory load error',e);}
+  updateMemBadge();
+}
+function saveMem(){
+  try{
+    // Keep conversations and history trimmed
+    if(MEM.conversations.length>50)MEM.conversations=MEM.conversations.slice(-50);
+    if(MEM.history.length>30)MEM.history=MEM.history.slice(-30);
+    if(MEM.facts.length>30)MEM.facts=MEM.facts.slice(-30);
+    MEM.lastSeen=new Date().toISOString();
+    localStorage.setItem(MEM_KEY,JSON.stringify(MEM));
+    updateMemBadge();
+  }catch(e){showToast('⚠️ Memory save error!');}
+}
+function updateMemBadge(){
+  const count=MEM.facts.length+MEM.bookings.length+(MEM.user.name?1:0)+(MEM.user.location?1:0);
+  document.getElementById('memCount').textContent=count;
+}
+function addFact(fact){
+  if(!fact||MEM.facts.includes(fact))return;
+  MEM.facts.push(fact);
+  saveMem();
+}
+function addBookingRecord(type,details){
+  MEM.bookings.push({type,details,date:new Date().toISOString()});
+  if(MEM.bookings.length>20)MEM.bookings=MEM.bookings.slice(-20);
+  saveMem();
+}
+function addConvSummary(role,msg){
+  MEM.conversations.push({role,msg:msg.substring(0,120),time:new Date().toISOString()});
+  saveMem();
+}
+function clearMemory(){
+  if(!confirm('Sari memory delete honar — sure aahas ka?'))return;
+  MEM={user:{name:'',location:'',preferences:[],bookedServices:[]},conversations:[],bookings:[],history:[],facts:[],lastSeen:''};
+  saveMem();
+  renderMemPanel();
+  showToast('🗑️ Memory cleared!');
+}
+
+// Memory Panel UI
+function openMem(){renderMemPanel();document.getElementById('memPanel').classList.add('open');}
+function closeMem(){document.getElementById('memPanel').classList.remove('open');}
+function renderMemPanel(){
+  const body=document.getElementById('memBody');
+  let html='';
+  // User profile
+  if(MEM.user.name||MEM.user.location){
+    html+=`<div class="mem-section"><div class="mem-sec-title">👤 USER PROFILE</div>`;
+    if(MEM.user.name)html+=`<div class="mem-item"><strong>Name:</strong> ${MEM.user.name}</div>`;
+    if(MEM.user.location)html+=`<div class="mem-item"><strong>Location:</strong> ${MEM.user.location}</div>`;
+    if(MEM.user.language)html+=`<div class="mem-item"><strong>Language:</strong> ${MEM.user.language}</div>`;
+    html+=`</div>`;
+  }
+  // Facts
+  if(MEM.facts.length>0){
+    html+=`<div class="mem-section"><div class="mem-sec-title">🧠 REMEMBERED FACTS (${MEM.facts.length})</div>`;
+    MEM.facts.slice(-10).forEach(f=>html+=`<div class="mem-item">${f}</div>`);
+    html+=`</div>`;
+  }
+  // Bookings
+  if(MEM.bookings.length>0){
+    html+=`<div class="mem-section"><div class="mem-sec-title">📋 BOOKING HISTORY (${MEM.bookings.length})</div>`;
+    MEM.bookings.slice(-5).forEach(b=>{
+      const dt=new Date(b.date).toLocaleDateString('en-IN');
+      html+=`<div class="mem-item"><strong>${b.type}</strong>: ${b.details} <span style="color:var(--text-dim);">(${dt})</span></div>`;
+    });
+    html+=`</div>`;
+  }
+  // Recent conversations
+  if(MEM.conversations.length>0){
+    html+=`<div class="mem-section"><div class="mem-sec-title">💬 RECENT CHATS (${MEM.conversations.length})</div>`;
+    MEM.conversations.slice(-6).forEach(c=>{
+      const dt=new Date(c.time).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+      html+=`<div class="mem-item"><strong style="color:${c.role==='user'?'#a78bfa':'var(--accent2)'};">${c.role==='user'?'You':'AI'}:</strong> ${c.msg}... <span style="color:var(--text-dim);">${dt}</span></div>`;
+    });
+    html+=`</div>`;
+  }
+  if(!html)html='<div style="font-size:11px;color:var(--text-dim);text-align:center;padding:20px;">No memories yet.<br>Chat kara — mee yaad thevto! 🧠</div>';
+  body.innerHTML=html;
+  const total=MEM.facts.length+MEM.bookings.length+(MEM.user.name?1:0);
+  document.getElementById('memPanelCount').textContent=total+' memories';
+}
+
+// Extract user info from messages
+function extractFromMsg(msg){
+  const lower=msg.toLowerCase();
+  // Name
+  const nameMatch=msg.match(/(?:mi|me|maza naam|my name is|mee|I am|I'm)\s+([A-Z][a-z]+)/i);
+  if(nameMatch&&!MEM.user.name){MEM.user.name=nameMatch[1];addFact(`User name: ${nameMatch[1]}`);}
+  // Location
+  const locMatch=msg.match(/(?:pune|mumbai|nashik|nagpur|aurangabad|kolhapur|satara|solapur|delhi|bangalore|chennai|hyderabad|ahmedabad|jaipur|kolkata|surat|lucknow|kanpur|patna|bhopal|indore|vadodara|agra|varanasi|meerut|coimbatore|visakhapatnam)/i);
+  if(locMatch&&!MEM.user.location){MEM.user.location=locMatch[0];addFact(`User location: ${locMatch[0]}`);}
+  // Bookings mentioned
+  if(lower.includes('hotel'))addFact(`Interested in hotel booking`);
+  if(lower.includes('train'))addFact(`Uses train travel`);
+  if(lower.includes('flight')||lower.includes('plane'))addFact(`Uses flight travel`);
+  if(lower.includes('movie'))addFact(`Likes movies`);
+}
+
+// ══ STATE ══
+let mode='general';
+let langCode='mr',langLocale='mr-IN',langName='मराठी';
+let isLoading=false;
+let recognition=null,isRec=false;
+let deferredInstall=null;
+let lastDate='',lastLoc=null;
+
+// ══ PWA ══
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredInstall=e;
+  setTimeout(()=>document.getElementById('instBar').classList.add('show'),5000);
+});
+async function installPWA(){
+  if(!deferredInstall){showToast('Share → Add to Home Screen 📱');return;}
+  deferredInstall.prompt();
+  const{outcome}=await deferredInstall.userChoice;
+  if(outcome==='accepted'){document.getElementById('instBar').classList.remove('show');showToast('✅ Installed! 🎉');}
+  deferredInstall=null;
+}
+window.addEventListener('appinstalled',()=>{document.getElementById('instBar').classList.remove('show');showToast('🎉 G11D.ai installed!');});
+
+// Network
+window.addEventListener('online',()=>{const n=document.getElementById('netStatus');n.className='online-dot-wrap on';document.getElementById('netTxt').textContent='ONLINE';showToast('✅ Connected!');});
+window.addEventListener('offline',()=>{const n=document.getElementById('netStatus');n.className='online-dot-wrap off';document.getElementById('netTxt').textContent='OFFLINE';showToast('📶 Offline!');});
+
+// ══ LOCATION ══
+function getLocationAndAsk(){
+  showToast('📍 Location detect ho rahe aahe...');
+  if(!navigator.geolocation){showToast('Location not supported!');return;}
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      lastLoc={lat:pos.coords.latitude,lng:pos.coords.longitude};
+      addFact(`User GPS: ${lastLoc.lat.toFixed(4)}, ${lastLoc.lng.toFixed(4)}`);
+      // Reverse geocode with nominatim (free)
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lastLoc.lat}&lon=${lastLoc.lng}`)
+        .then(r=>r.json())
+        .then(data=>{
+          const loc=data.address?.city||data.address?.town||data.address?.village||data.address?.county||'your area';
+          const state=data.address?.state||'';
+          const locStr=`${loc}${state?', '+state:''}`;
+          MEM.user.location=locStr;
+          addFact(`User location (GPS): ${locStr}`);
+          saveMem();
+          document.getElementById('inp').value=`Mee aata ${locStr} madhe ahe. Aapass khaane, hotels, places, events saang 📍`;
+          showToast(`📍 ${locStr}`);
+        })
+        .catch(()=>{
+          document.getElementById('inp').value=`Mee ${lastLoc.lat.toFixed(3)}, ${lastLoc.lng.toFixed(3)} var ahe. Nearby kahi saang 📍`;
+          showToast(`📍 Location ready!`);
+        });
+    },
+    err=>{showToast('📍 Location denied. Settings madhe allow kara!');},
+    {timeout:8000,enableHighAccuracy:true}
+  );
+}
+
+// ══ BOOKING ENGINE ══
+function buildBookingCard(type,query){
+  const q=encodeURIComponent(query);
+  const cards={
+    hotel:{
+      title:'🏨 Hotel Booking',
+      links:[
+        {label:'MakeMyTrip',url:`https://www.makemytrip.com/hotels/hotel-listing/`,cls:'primary'},
+        {label:'OYO Rooms',url:`https://www.oyorooms.com/search/?location=${q}`,cls:'green'},
+        {label:'Booking.com',url:`https://www.booking.com/search.html?ss=${q}`,cls:'blue'},
+        {label:'Goibibo',url:`https://www.goibibo.com/hotels/hotels-in-${q}/`,cls:'amber'},
+        {label:'Agoda',url:`https://www.agoda.com/search?city=${q}`,cls:'primary'},
+      ],
+      note:'Best deal sathi doni teen sites compare kara!'
+    },
+    flight:{
+      title:'✈️ Flight Booking',
+      links:[
+        {label:'MakeMyTrip',url:`https://www.makemytrip.com/flights/`,cls:'primary'},
+        {label:'Goibibo',url:`https://www.goibibo.com/flights/`,cls:'green'},
+        {label:'Skyscanner',url:`https://www.skyscanner.co.in/`,cls:'blue'},
+        {label:'Cleartrip',url:`https://www.cleartrip.com/flights`,cls:'amber'},
+        {label:'EaseMyTrip',url:`https://www.easemytrip.com/`,cls:'primary'},
+      ],
+      note:'Incognito mode madhe search kara — fares kami diston!'
+    },
+    train:{
+      title:'🚆 Train Ticket',
+      links:[
+        {label:'IRCTC (Official)',url:`https://www.irctc.co.in/nget/train-search`,cls:'primary'},
+        {label:'RailYatri',url:`https://www.railyatri.in/timetable`,cls:'green'},
+        {label:'ConfirmTkt',url:`https://www.confirmtkt.com/`,cls:'blue'},
+        {label:'RailMitra',url:`https://railmitra.com/`,cls:'amber'},
+      ],
+      note:'IRCTC official aahe — tatkal sathi 10:00 AM ready raha!'
+    },
+    bus:{
+      title:'🚌 Bus Ticket',
+      links:[
+        {label:'redBus',url:`https://www.redbus.in/`,cls:'primary'},
+        {label:'AbhiBus',url:`https://www.abhibus.com/`,cls:'green'},
+        {label:'MakeMyTrip Bus',url:`https://www.makemytrip.com/bus-tickets/`,cls:'blue'},
+        {label:'Goibibo Bus',url:`https://www.goibibo.com/bus/`,cls:'amber'},
+        {label:'MSRTC (Maharashtra)',url:`https://msrtcreservation.com/`,cls:'primary'},
+      ],
+      note:'redBus var sabse jast buses miltat India bhar!'
+    },
+    movie:{
+      title:'🎬 Movie Ticket',
+      links:[
+        {label:'BookMyShow',url:`https://in.bookmyshow.com/explore/movies`,cls:'primary'},
+        {label:'Paytm Movies',url:`https://movies.paytm.com/`,cls:'green'},
+        {label:'PVR Cinemas',url:`https://www.pvrcinemas.com/`,cls:'blue'},
+        {label:'INOX',url:`https://www.inoxmovies.com/`,cls:'amber'},
+        {label:'Cinépolis',url:`https://www.cinepolisindia.com/`,cls:'primary'},
+      ],
+      note:'BookMyShow var sabse jast theatres astat India madhe!'
+    },
+    event:{
+      title:'🎪 Events & Entertainment',
+      links:[
+        {label:'BookMyShow Events',url:`https://in.bookmyshow.com/explore/events`,cls:'primary'},
+        {label:'Insider.in',url:`https://insider.in/all`,cls:'green'},
+        {label:'Paytm Events',url:`https://paytm.com/entertainment`,cls:'blue'},
+        {label:'District by Zomato',url:`https://www.district.in/events`,cls:'amber'},
+        {label:'Townscript',url:`https://www.townscript.com/`,cls:'primary'},
+      ],
+      note:'Concerts, Comedy Shows, Sports — sab ek jaghi!'
+    },
+    restaurant:{
+      title:'🍽️ Restaurant & Food',
+      links:[
+        {label:'Zomato',url:`https://www.zomato.com/`,cls:'primary'},
+        {label:'Swiggy',url:`https://www.swiggy.com/`,cls:'green'},
+        {label:'Google Maps',url:`https://www.google.com/maps/search/restaurants+near+me`,cls:'blue'},
+        {label:'EatSure',url:`https://eatsure.com/`,cls:'amber'},
+      ],
+      note:'Delivery sathi Swiggy/Zomato, Dine-in sathi Google Maps!'
+    },
+    plan:{
+      title:'🛫 Full Trip Plan',
+      links:[
+        {label:'MakeMyTrip Holiday',url:`https://www.makemytrip.com/holidays/`,cls:'primary'},
+        {label:'Thomas Cook',url:`https://www.thomascook.in/holidays/`,cls:'green'},
+        {label:'TripAdvisor',url:`https://www.tripadvisor.in/`,cls:'blue'},
+        {label:'Yatra',url:`https://www.yatra.com/`,cls:'amber'},
+        {label:'IRCTC Tourism',url:`https://www.irctctourism.com/`,cls:'primary'},
+      ],
+      note:'Complete holiday package sathi MakeMyTrip best aahe!'
+    }
+  };
+  const c=cards[type]||cards.hotel;
+  let linksHtml=c.links.map(l=>`<a href="${l.url}" target="_blank" rel="noopener" class="book-btn ${l.cls}">${l.label}</a>`).join('');
+  return`<div class="booking-card"><div class="booking-title">${c.title}</div><div class="booking-links">${linksHtml}</div><div class="book-note">💡 ${c.note}</div></div>`;
+}
+
+function detectBookingType(msg){
+  const m=msg.toLowerCase();
+  if(m.includes('hotel')||m.includes('stay')||m.includes('room')||m.includes('lodge'))return'hotel';
+  if(m.includes('flight')||m.includes('plane')||m.includes('fly')||m.includes('airplane'))return'flight';
+  if(m.includes('train')||m.includes('rail')||m.includes('irctc')||m.includes('railway'))return'train';
+  if(m.includes('bus')||m.includes('redbus')||m.includes('msrtc'))return'bus';
+  if(m.includes('movie')||m.includes('cinema')||m.includes('film')||m.includes('theater'))return'movie';
+  if(m.includes('event')||m.includes('concert')||m.includes('show')||m.includes('entertainment')||m.includes('ticket'))return'event';
+  if(m.includes('restaurant')||m.includes('food delivery')||m.includes('order food')||m.includes('khana order'))return'restaurant';
+  if(m.includes('trip')||m.includes('tour')||m.includes('holiday')||m.includes('plan my trip'))return'plan';
+  return null;
+}
+
+// ══ HELPERS ══
+function aResize(el){el.style.height='';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+function hKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
+function setMode(m,el){mode=m;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
+function sLang(name,code,locale){langName=name;langCode=code;langLocale=locale;closeLang();addFact(`User language: ${name}`);showToast('✅ '+name);}
+function openLang(){document.getElementById('langModal').classList.add('open');}
+function closeLang(){document.getElementById('langModal').classList.remove('open');}
+document.getElementById('langModal').addEventListener('click',function(e){if(e.target===this)closeLang();});
+function quickAsk(t){document.getElementById('inp').value=t;send();}
+function showToast(msg,dur=2600){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+
+// ══ MESSAGES ══
+function hideWelcome(){const w=document.getElementById('welcome');if(w)w.remove();}
+function maybeDate(){
+  const today=`${DAYS[new Date().getDay()]}, ${new Date().getDate()} ${MONTHS[new Date().getMonth()]} ${new Date().getFullYear()}`;
+  if(lastDate!==today){lastDate=today;const m=document.getElementById('msgs');const d=document.createElement('div');d.className='date-div';d.innerHTML=`<span>📅 ${today}</span>`;m.appendChild(d);}
+}
+function addMsg(role,html,extra){
+  hideWelcome();maybeDate();
+  const msgs=document.getElementById('msgs');
+  const div=document.createElement('div');div.className=`msg ${role}`;
+  const{time}=getDT();
+  const av=role==='ai'?'🧠':'👤';
+  const name=role==='ai'?'G11D AI':'You';
+  const memBadge=role==='ai'?'<div class="mem-saved-badge">🧠 Memory Saved</div>':'';
+  div.innerHTML=`<div class="msg-av">${av}</div><div class="msg-body"><div class="msg-name">${name}</div><div class="bubble">${html}${extra||''}</div>${memBadge}<div class="msg-time">🕐 ${time}</div></div>`;
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+function addTyping(){
+  hideWelcome();const msgs=document.getElementById('msgs');
+  const div=document.createElement('div');div.className='msg ai';div.id='typin';
+  div.innerHTML=`<div class="msg-av">🧠</div><div class="msg-body"><div class="msg-name">G11D AI</div><div class="bubble"><div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div></div></div>`;
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+function removeTyping(){const t=document.getElementById('typin');if(t)t.remove();}
+function mdToHtml(t){
+  return t
+    .replace(/```[\w]*\n?([\s\S]*?)```/g,'<pre>$1</pre>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/^#{1,3}\s(.+)$/gm,'<h3>$1</h3>')
+    .replace(/^[-•]\s(.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>)+/gs,m=>`<ul>${m}</ul>`)
+    .replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
+}
+
+// ══ MEGA SYSTEM PROMPT WITH MEMORY INJECTION ══
+const MODE_CTX={
+  general:'Help with ANYTHING — no limits whatsoever',
+  booking:'Hotel, Flight, Train, Bus, Movie, Event booking — help user book anything, provide best platforms, tips, price comparison advice',
+  travel:'Trip planning, itinerary building, visa info, packing tips, budget travel, accommodation, local food, hidden gems',
+  food:'Recipes, restaurant recommendations, food delivery, cooking tips, diet planning, meal prep',
+  security:'Bug bounty, ethical hacking, IDOR, XSS, SQLi, SSRF, WAF bypass, pentesting, security research',
+  health:'Fitness, diet, exercise, yoga, meditation, mental health, sleep, home remedies, wellness',
+  study:'All subjects, exam prep, homework, concepts, memory techniques, notes',
+  work:'Productivity, coding, debugging, professional writing, business, freelancing',
+  finance:'Budgeting, investing, saving, mutual funds, tax, ITR, startup finance',
+  entertainment:'Movies, music, shows, OTT recommendations, events, concerts, games, fun',
+  local:'Nearby places, restaurants, hospitals, ATMs, petrol pumps, shops, events — based on user location',
+  morning:'Morning routine, day planning, breakfast, motivation, to-do list, energy boost',
+  night:'Night wind-down, reflection, tomorrow planning, relaxation, sleep tips, gratitude',
+};
+
+function buildSystem(){
+  const{date,h,d}=getDT();
+  const g=greeting(h);
+  const memSummary=buildMemSummary();
+  return`You are G11D AI — the ULTIMATE personal AI assistant created by Ganpat Darade (AgniProtocol Tech, Maharashtra, India).
+
+━━ REAL-TIME CONTEXT ━━
+Date: ${date} | Time: ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')} | ${g}
+Day: ${DAYS[d.getDay()]} | Timezone: IST
+
+━━ ABOUT CREATOR — GANPAT DARADE ━━
+Security Researcher, Founder AgniProtocol Tech, Bug Bounty Hunter (Google VRP Hall of Fame, HackerOne, Bugcrowd), Maharashtra, India. Building G11D.ai as an all-rounder AI platform.
+
+━━ PERSISTENT MEMORY — WHAT YOU KNOW ━━
+${memSummary}
+
+━━ CURRENT MODE ━━
+${MODE_CTX[mode]||MODE_CTX.general}
+
+━━ LANGUAGE RULES (NEVER BREAK) ━━
+- Detect and ALWAYS reply in the exact language/script/mix the user writes in
+- Marathi → Marathi | Hindi → Hindi | Mixed → same mix | English → English
+- Technical terms stay in English always (industry standard)
+
+━━ PERSONALITY ━━
+- Warm, caring best friend — never judgemental
+- Remember EVERYTHING the user told you from memory above
+- Use their name if known, reference their location if relevant
+- For bookings: ALWAYS give direct platform links in your reply + advice
+- For location queries: use their GPS/city from memory
+
+━━ BOOKING EXPERTISE ━━
+When user asks to book ANYTHING:
+1. Acknowledge what they want to book
+2. Ask for missing details (from city, to city, date, no. of people) if not provided
+3. Give best platforms for that booking type
+4. Give tips (best time to book, price comparison, offers)
+5. Note: you cannot directly book — you redirect to the best platforms
+
+━━ MEMORY INSTRUCTION ━━
+After EVERY response, internally note any new facts to remember:
+- User's name, location, preferences, past bookings, important info
+- These are already injected above — use them proactively!`;
+}
+
+function buildMemSummary(){
+  let s='';
+  if(MEM.user.name)s+=`User Name: ${MEM.user.name}\n`;
+  if(MEM.user.location)s+=`User Location: ${MEM.user.location}\n`;
+  if(MEM.user.language)s+=`Preferred Language: ${MEM.user.language}\n`;
+  if(MEM.facts.length>0)s+=`Known Facts:\n${MEM.facts.slice(-12).map(f=>`- ${f}`).join('\n')}\n`;
+  if(MEM.bookings.length>0)s+=`Past Bookings:\n${MEM.bookings.slice(-5).map(b=>`- ${b.type}: ${b.details}`).join('\n')}\n`;
+  if(MEM.conversations.length>0)s+=`Recent conversation snippets:\n${MEM.conversations.slice(-5).map(c=>`${c.role}: ${c.msg}`).join('\n')}\n`;
+  return s||'No memory yet — first conversation!';
+}
+
+// ══ CLAUDE API ══
+async function callClaude(msg){
+  MEM.history.push({role:'user',content:msg});
+  const trimmed=MEM.history.slice(-20);
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:buildSystem(),messages:trimmed})
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'API error '+res.status);}
+  const data=await res.json();
+  const reply=data.content?.map(b=>b.text||'').join('')||'...';
+  MEM.history.push({role:'assistant',content:reply});
+  return reply;
+}
+
+// ══ VOICE ══
+function toggleVoice(){
+  if(isRec){stopVoice();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('Voice: Chrome browser vaapra!');return;}
+  recognition=new SR();
+  recognition.continuous=false;recognition.interimResults=true;recognition.lang=langLocale;
+  recognition.onstart=()=>{isRec=true;document.getElementById('micBtn').classList.add('rec');document.getElementById('micBtn').textContent='🔴';document.getElementById('vsBar').classList.add('active');};
+  recognition.onresult=e=>{
+    let int='',fin='';
+    for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=t;else int+=t;}
+    const disp=fin||int;
+    document.getElementById('inp').value=disp;
+    document.getElementById('vsTxt').textContent=disp?`"${disp.substring(0,32)}..."`:'Bola... 👂';
+    aResize(document.getElementById('inp'));
+    if(fin){stopVoice();setTimeout(()=>send(),350);}
+  };
+  recognition.onerror=()=>stopVoice();
+  recognition.onend=()=>{if(isRec)stopVoice();};
+  recognition.start();
+}
+function stopVoice(){
+  isRec=false;
+  if(recognition){try{recognition.stop();}catch(e){}recognition=null;}
+  document.getElementById('micBtn').classList.remove('rec');
+  document.getElementById('micBtn').textContent='🎤';
+  document.getElementById('vsBar').classList.remove('active');
+}
+
+// ══ SEND ══
+async function send(){
+  if(isLoading)return;
+  const input=document.getElementById('inp');
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';input.style.height='';
+  isLoading=true;document.getElementById('sbtn').disabled=true;
+
+  // Extract facts from user message
+  extractFromMsg(text);
+  addConvSummary('user',text);
+  addMsg('user',mdToHtml(text));
+  addTyping();
+
+  // Detect booking type
+  const bType=detectBookingType(text);
+  let bookingCard='';
+  if(bType){
+    const locQuery=MEM.user.location||'India';
+    bookingCard=buildBookingCard(bType,locQuery);
+    addBookingRecord(bType,text.substring(0,80));
+  }
+
+  try{
+    const reply=await callClaude(text);
+    removeTyping();
+    // Extract facts from AI reply too (for memory)
+    addConvSummary('ai',reply);
+    addMsg('ai',mdToHtml(reply),bookingCard);
+    saveMem();
+    updateMemBadge();
+  }catch(err){
+    removeTyping();
+    MEM.history.pop();
+    addMsg('ai',`⚠️ <strong>Error:</strong> ${err.message}<br>Internet check kara!`,bookingCard);
+  }
+  isLoading=false;document.getElementById('sbtn').disabled=false;
+}
+
+// ══ INIT ══
+loadMem();
+
+// PWA Manifest
+const MFT={name:"G11D.ai — Ultimate AI",short_name:"G11D.ai",description:"Your complete AI — Booking, Memory, Voice, Offline",start_url:"./",display:"standalone",background_color:"#0a0a0f",theme_color:"#7c3aed",orientation:"portrait-primary",icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%237c3aed'/><text y='350' x='60' font-size='320'>🧠</text></svg>",sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}]};
+const mBlob=new Blob([JSON.stringify(MFT)],{type:'application/json'});
+const lnk=document.createElement('link');lnk.rel='manifest';lnk.href=URL.createObjectURL(mBlob);
+document.head.appendChild(lnk);
+
+// Welcome returning user
+if(MEM.lastSeen&&MEM.user.name){
+  const last=new Date(MEM.lastSeen);
+  const lastStr=`${last.getDate()} ${MONTHS[last.getMonth()]}`;
+  setTimeout(()=>showToast(`👋 Welcome back, ${MEM.user.name}! (Last seen: ${lastStr})`),800);
+}
+</script>
+</body>
+</html>
