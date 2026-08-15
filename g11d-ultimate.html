@@ -8,6 +8,41 @@
 <meta name="apple-mobile-web-app-title" content="G11D.ai">
 <title>G11D.ai — Ultimate AI</title>
 <style>
+/* API KEY SETUP SCREEN */
+.setup-screen{
+  position:fixed;inset:0;z-index:9000;
+  background:linear-gradient(135deg,#0a0a0f,#1a0533,#0a1628);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;gap:16px;
+}
+.setup-screen.hidden{display:none;}
+.setup-logo-svg{width:100px;height:100px;margin-bottom:8px;}
+.setup-title{font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;
+  background:linear-gradient(135deg,#00ff88,#00bfff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:2px;text-align:center;}
+.setup-sub{font-size:12px;color:#64748b;text-align:center;line-height:1.6;max-width:300px;font-family:'Nunito',sans-serif;}
+.setup-input{
+  width:100%;max-width:340px;
+  background:#12121a;border:1.5px solid #2a2a3d;border-radius:10px;
+  padding:12px 14px;color:#f8fafc;font-family:'JetBrains Mono',monospace;
+  font-size:12px;outline:none;transition:border-color 0.2s;
+}
+.setup-input:focus{border-color:#7c3aed;box-shadow:0 0 0 2px rgba(124,58,237,0.15);}
+.setup-input::placeholder{color:#4a5568;}
+.setup-btn{
+  width:100%;max-width:340px;
+  background:linear-gradient(135deg,#7c3aed,#06b6d4);
+  border:none;border-radius:10px;padding:13px;
+  color:#fff;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;
+  cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;
+}
+.setup-btn:hover{transform:scale(1.02);box-shadow:0 0 20px rgba(124,58,237,0.4);}
+.setup-note{font-size:10px;color:#4a5568;text-align:center;line-height:1.5;max-width:300px;font-family:'Nunito',sans-serif;}
+.setup-note a{color:#7c3aed;}
+.setup-skip{font-size:11px;color:#4a5568;cursor:pointer;font-family:'Nunito',sans-serif;text-decoration:underline;margin-top:-4px;}
+</style>
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
 :root{
   --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;--border:#2a2a3d;
@@ -183,10 +218,75 @@ textarea#inp::placeholder{color:var(--text-dim);}
 </head>
 <body>
 
+<!-- API KEY SETUP SCREEN -->
+<div class="setup-screen" id="setupScreen">
+  <svg class="setup-logo-svg" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1a0533"/><stop offset="50%" style="stop-color:#2d1069"/><stop offset="100%" style="stop-color:#0a1628"/></linearGradient>
+      <linearGradient id="sg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#00ff88"/><stop offset="100%" style="stop-color:#00bfff"/></linearGradient>
+      <linearGradient id="sg3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#a78bfa"/><stop offset="100%" style="stop-color:#22d3ee"/></linearGradient>
+      <filter id="sg4"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <rect width="512" height="512" rx="100" fill="url(#sg1)"/>
+    <circle cx="256" cy="210" r="160" fill="none" stroke="url(#sg2)" stroke-width="2" opacity="0.35"/>
+    <path d="M256 65 L375 112 L375 225 Q375 305 256 365 Q137 305 137 225 L137 112 Z" fill="rgba(124,58,237,0.12)" stroke="url(#sg2)" stroke-width="2.5" filter="url(#sg4)"/>
+    <g transform="translate(256,205)" filter="url(#sg4)">
+      <path d="M-18,-58 C-68,-58 -88,-28 -83,2 C-78,27 -63,37 -53,47 C-43,57 -28,67 -18,72 L-18,-58 Z" fill="none" stroke="url(#sg3)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M18,-58 C68,-58 88,-28 83,2 C78,27 63,37 53,47 C43,57 28,67 18,72 L18,-58 Z" fill="none" stroke="url(#sg3)" stroke-width="5" stroke-linecap="round"/>
+      <line x1="0" y1="-58" x2="0" y2="72" stroke="url(#sg2)" stroke-width="2.5" stroke-dasharray="7,5"/>
+      <path d="M-18,-28 C-48,-33 -63,-13 -53,2" fill="none" stroke="#a78bfa" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M-18,12 C-53,7 -68,27 -58,42" fill="none" stroke="#a78bfa" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M18,-28 C48,-33 63,-13 53,2" fill="none" stroke="#22d3ee" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M18,12 C53,7 68,27 58,42" fill="none" stroke="#22d3ee" stroke-width="3.5" stroke-linecap="round"/>
+      <circle cx="-58" cy="2" r="5" fill="#00ff88" filter="url(#sg4)"/>
+      <circle cx="58" cy="2" r="5" fill="#00bfff" filter="url(#sg4)"/>
+      <circle cx="-43" cy="-33" r="4" fill="#a78bfa"/>
+      <circle cx="43" cy="-33" r="4" fill="#22d3ee"/>
+    </g>
+    <text x="256" y="418" font-family="Arial Black,sans-serif" font-size="72" font-weight="900" text-anchor="middle" letter-spacing="6" fill="url(#sg2)" filter="url(#sg4)">G11D</text>
+    <text x="256" y="458" font-family="Arial,sans-serif" font-size="28" font-weight="700" text-anchor="middle" letter-spacing="8" fill="#a78bfa">.ai</text>
+    <text x="256" y="490" font-family="Arial,sans-serif" font-size="12" text-anchor="middle" letter-spacing="3" fill="#4a5568">ULTIMATE AI</text>
+  </svg>
+
+  <div class="setup-title">G11D.ai Setup</div>
+  <div class="setup-sub">Tumcha Anthropic API Key enter kara — ek vela enter keli ki app fully working hoel! 🔥</div>
+
+  <input class="setup-input" type="password" id="apiKeyInput"
+    placeholder="sk-ant-api03-xxxxxxxxxxxxxxxx..."
+    autocomplete="off" autocorrect="off" spellcheck="false"/>
+
+  <button class="setup-btn" onclick="saveApiKey()">🚀 G11D.ai Start Kara</button>
+
+  <div class="setup-note">
+    API Key: <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> var milel<br>
+    Key tumhachya phone madhe <strong>safe store</strong> hote (localStorage)<br>
+    Koni bhi baher pathvat nahi — 100% private! 🔒
+  </div>
+  <div class="setup-skip" onclick="skipSetup()">Demo mode madhe open kara (AI work nahi kanar)</div>
+</div>
+
 <!-- TOPBAR -->
 <div class="topbar">
   <div style="display:flex;align-items:center;gap:7px;">
-    <div class="logo-orb">🧠</div>
+    <svg width="32" height="32" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" style="border-radius:9px;flex-shrink:0;">
+      <defs>
+        <linearGradient id="tg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1a0533"/><stop offset="100%" style="stop-color:#0a1628"/></linearGradient>
+        <linearGradient id="tg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#00ff88"/><stop offset="100%" style="stop-color:#00bfff"/></linearGradient>
+        <linearGradient id="tg3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#a78bfa"/><stop offset="100%" style="stop-color:#22d3ee"/></linearGradient>
+      </defs>
+      <rect width="512" height="512" rx="100" fill="url(#tg1)"/>
+      <path d="M256 65 L375 112 L375 225 Q375 305 256 365 Q137 305 137 225 L137 112 Z" fill="rgba(124,58,237,0.15)" stroke="url(#tg2)" stroke-width="3"/>
+      <g transform="translate(256,205)">
+        <path d="M-18,-58 C-68,-58 -88,-28 -83,2 C-78,27 -63,37 -53,47 L-18,72 L-18,-58 Z" fill="none" stroke="url(#tg3)" stroke-width="6" stroke-linecap="round"/>
+        <path d="M18,-58 C68,-58 88,-28 83,2 C78,27 63,37 53,47 L18,72 L18,-58 Z" fill="none" stroke="url(#tg3)" stroke-width="6" stroke-linecap="round"/>
+        <line x1="0" y1="-58" x2="0" y2="72" stroke="url(#tg2)" stroke-width="3" stroke-dasharray="8,5"/>
+        <path d="M-18,-28 C-48,-33 -63,-13 -53,2" fill="none" stroke="#a78bfa" stroke-width="4"/>
+        <path d="M18,-28 C48,-33 63,-13 53,2" fill="none" stroke="#22d3ee" stroke-width="4"/>
+        <circle cx="-58" cy="2" r="6" fill="#00ff88"/>
+        <circle cx="58" cy="2" r="6" fill="#00bfff"/>
+      </g>
+      <text x="256" y="430" font-family="Arial Black,sans-serif" font-size="80" font-weight="900" text-anchor="middle" fill="url(#tg2)">G11D</text>
+    </svg>
     <div><div class="logo-text">G11D.ai</div><div class="logo-sub">ULTIMATE AI · ALL-IN-ONE</div></div>
   </div>
   <div class="clock-wrap" style="margin-left:8px;">
@@ -726,7 +826,7 @@ async function callClaude(msg){
   const trimmed=MEM.history.slice(-20);
   const res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json','x-api-key':STORED_API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
     body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:buildSystem(),messages:trimmed})
   });
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'API error '+res.status);}
@@ -805,8 +905,37 @@ async function send(){
   isLoading=false;document.getElementById('sbtn').disabled=false;
 }
 
+// ══ API KEY MANAGEMENT ══
+const API_KEY_STORE='g11d_api_key_v1';
+let STORED_API_KEY='';
+
+function loadApiKey(){
+  STORED_API_KEY=localStorage.getItem(API_KEY_STORE)||'';
+  if(!STORED_API_KEY){
+    document.getElementById('setupScreen').classList.remove('hidden');
+  } else {
+    document.getElementById('setupScreen').classList.add('hidden');
+  }
+}
+function saveApiKey(){
+  const key=document.getElementById('apiKeyInput').value.trim();
+  if(!key||!key.startsWith('sk-ant')){
+    showToast('⚠️ Valid API key enter kara! (sk-ant- ne suru hote)');
+    return;
+  }
+  STORED_API_KEY=key;
+  localStorage.setItem(API_KEY_STORE,key);
+  document.getElementById('setupScreen').classList.add('hidden');
+  showToast('✅ API Key saved! G11D.ai ready! 🔥');
+}
+function skipSetup(){
+  document.getElementById('setupScreen').classList.add('hidden');
+  showToast('⚠️ Demo mode — AI responses nahi milnar!');
+}
+
 // ══ INIT ══
 loadMem();
+loadApiKey();
 
 // PWA Manifest
 const MFT={name:"G11D.ai — Ultimate AI",short_name:"G11D.ai",description:"Your complete AI — Booking, Memory, Voice, Offline",start_url:"./",display:"standalone",background_color:"#0a0a0f",theme_color:"#7c3aed",orientation:"portrait-primary",icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%237c3aed'/><text y='350' x='60' font-size='320'>🧠</text></svg>",sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}]};
