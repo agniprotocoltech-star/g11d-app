@@ -421,19 +421,48 @@ function renderMem(){
   b.innerHTML=h;
 }
 
-// ══ API KEY ══
+// ══ API KEY — PERMANENT STORAGE ══
 const AK='g11d_or_key_v1';
 let API_KEY='';
-function loadKey(){API_KEY=localStorage.getItem(AK)||'';if(!API_KEY)document.getElementById('setupScreen').classList.remove('hidden');else document.getElementById('setupScreen').classList.add('hidden');}
+function loadKey(){
+  // Check multiple storage locations
+  API_KEY=localStorage.getItem(AK)||
+          sessionStorage.getItem(AK)||
+          '';
+  if(!API_KEY){
+    document.getElementById('setupScreen').classList.remove('hidden');
+  } else {
+    document.getElementById('setupScreen').classList.add('hidden');
+    // Re-save in both storages to ensure persistence
+    localStorage.setItem(AK,API_KEY);
+    sessionStorage.setItem(AK,API_KEY);
+  }
+}
 function saveKey(){
   const k=document.getElementById('apiKeyInput').value.trim();
   if(!k||k.length<10){showToast('⚠️ Valid key enter kara!');return;}
-  API_KEY=k;localStorage.setItem(AK,k);
+  API_KEY=k;
+  // Save in multiple places for persistence
+  localStorage.setItem(AK,k);
+  sessionStorage.setItem(AK,k);
+  // Also save in cookie (365 days)
+  document.cookie=`g11d_key=${encodeURIComponent(k)};max-age=31536000;path=/;SameSite=Lax`;
   document.getElementById('setupScreen').classList.add('hidden');
-  showToast('✅ Key saved! G11D.ai ready! 🔥');
+  showToast('✅ Key saved permanently! 🔥');
+}
+function getKeyFromCookie(){
+  const match=document.cookie.match(/g11d_key=([^;]+)/);
+  return match?decodeURIComponent(match[1]):'';
 }
 function skipSetup(){document.getElementById('setupScreen').classList.add('hidden');showToast('Demo mode — AI nahi chalnar!');}
-function resetKey(){localStorage.removeItem(AK);API_KEY='';document.getElementById('setupScreen').classList.remove('hidden');document.getElementById('apiKeyInput').value='';}
+function resetKey(){
+  localStorage.removeItem(AK);
+  sessionStorage.removeItem(AK);
+  document.cookie='g11d_key=;max-age=0;path=/';
+  API_KEY='';
+  document.getElementById('setupScreen').classList.remove('hidden');
+  document.getElementById('apiKeyInput').value='';
+}
 
 // ══ STATE ══
 let mode='general',langLocale='mr-IN',isLoading=false,recognition=null,isRec=false,deferredInstall=null,lastDate='';
@@ -679,6 +708,11 @@ async function send(){
 
 // ══ INIT ══
 loadMem();
+// Load key from cookie if localStorage empty
+if(!localStorage.getItem(AK)){
+  const cookieKey=getKeyFromCookie();
+  if(cookieKey){localStorage.setItem(AK,cookieKey);}
+}
 loadKey();
 if(MEM.lastSeen&&MEM.user.name){
   const last=new Date(MEM.lastSeen);
