@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#00ff88">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="G11D Security AI">
+<title>G11D Security AI — Ethical Hacking Trainer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Nunito:wght@700;800;900&display=swap');
+:root{
+  --bg:#060a0e;--bg2:#0d1117;--bg3:#111820;--bg4:#161d26;
+  --border:#1e2d3d;--border2:#243447;
+  --green:#00ff88;--blue:#00bfff;--red:#ff4444;--yellow:#ffd700;--purple:#a855f7;--orange:#ff8c00;
+  --text:#c9d1d9;--text-dim:#4a5568;--text-hi:#e6edf3;
+  --bubble-ai:#0d1117;--bubble-user:#1a1f3a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;display:flex;flex-direction:column;height:100dvh;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,136,0.012) 3px,rgba(0,255,136,0.012) 4px);pointer-events:none;z-index:9999;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes glow{0%,100%{text-shadow:0 0 8px rgba(0,255,136,0.5);}50%{text-shadow:0 0 18px rgba(0,255,136,0.9),0 0 35px rgba(0,255,136,0.4);}}
+@keyframes typingDot{0%,80%,100%{transform:scale(0.7);opacity:0.3}40%{transform:scale(1);opacity:1}}
+@keyframes voicePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+@keyframes scanline{0%{top:-10%}100%{top:110%}}
+@keyframes wave{0%,100%{transform:scaleY(0.4)}50%{transform:scaleY(1)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(13,17,23,0.97);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;z-index:10;}
+.logo-block{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#00ff88,#00bfff);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 14px rgba(0,255,136,0.4);}
+.logo-name{font-size:15px;font-weight:900;color:var(--green);letter-spacing:2px;text-shadow:0 0 10px rgba(0,255,136,0.4);font-family:'Share Tech Mono',monospace;}
+.logo-sub{font-size:8px;color:var(--text-dim);letter-spacing:1.5px;}
+.live-dt{display:flex;flex-direction:column;align-items:center;margin:0 4px;}
+.live-time{font-size:13px;font-weight:600;color:var(--green);letter-spacing:1px;font-family:'Share Tech Mono',monospace;}
+.live-date{font-size:8px;color:var(--text-dim);letter-spacing:0.3px;}
+.status-pill{display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;font-size:9px;font-weight:700;letter-spacing:0.5px;border:1px solid;white-space:nowrap;}
+.status-pill.online{background:rgba(0,255,136,0.08);border-color:rgba(0,255,136,0.2);color:var(--green);}
+.status-pill.offline{background:rgba(255,68,68,0.08);border-color:rgba(255,68,68,0.2);color:var(--red);}
+.s-dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:pulse 2s infinite;}
+.topbar-right{margin-left:auto;display:flex;gap:6px;align-items:center;}
+.t-btn{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 9px;font-size:10px;color:var(--text-dim);cursor:pointer;font-family:'Share Tech Mono',monospace;transition:all 0.2s;white-space:nowrap;}
+.t-btn:hover{border-color:var(--green);color:var(--green);}
+
+/* TOPIC CHIPS */
+.topics-bar{display:flex;gap:5px;overflow-x:auto;padding:8px 12px;flex-shrink:0;border-bottom:1px solid var(--border);background:rgba(13,17,23,0.8);scrollbar-width:none;z-index:5;position:relative;}
+.topics-bar::-webkit-scrollbar{display:none;}
+.topic{display:inline-flex;align-items:center;gap:3px;white-space:nowrap;padding:4px 10px;border-radius:4px;border:1px solid var(--border);background:var(--bg3);font-size:10px;font-weight:700;color:var(--text-dim);cursor:pointer;transition:all 0.2s;flex-shrink:0;font-family:'Share Tech Mono',monospace;letter-spacing:0.3px;}
+.topic:hover{border-color:var(--green);color:var(--green);background:rgba(0,255,136,0.05);}
+.topic.active{border-color:var(--green);color:var(--green);background:rgba(0,255,136,0.1);}
+
+/* MESSAGES */
+.messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:11px;position:relative;z-index:1;}
+.messages::-webkit-scrollbar{width:3px;}
+.messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* WELCOME */
+.welcome{display:flex;flex-direction:column;align-items:center;gap:11px;padding:20px 14px;text-align:center;}
+.w-banner{
+  width:100%;max-width:460px;
+  background:linear-gradient(135deg,rgba(0,255,136,0.06),rgba(0,191,255,0.04));
+  border:1px solid rgba(0,255,136,0.15);border-radius:10px;padding:16px;
+}
+.w-title{font-size:17px;font-weight:900;color:var(--green);letter-spacing:2px;margin-bottom:4px;animation:glow 2.5s ease-in-out infinite;}
+.w-sub{font-size:10px;color:var(--text);line-height:1.7;margin-bottom:10px;}
+.w-dt{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--blue);background:rgba(0,191,255,0.08);border:1px solid rgba(0,191,255,0.15);border-radius:5px;padding:4px 12px;display:inline-block;margin-bottom:10px;}
+.roadmap{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;max-width:460px;}
+.rm-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;transition:all 0.2s;text-align:left;}
+.rm-card:hover{border-color:var(--green);background:rgba(0,255,136,0.04);transform:translateY(-1px);}
+.rm-icon{font-size:17px;margin-bottom:3px;}
+.rm-title{font-size:11px;font-weight:800;color:var(--text-hi);font-family:'Nunito',sans-serif;}
+.rm-level{font-size:9px;color:var(--text-dim);letter-spacing:0.5px;}
+
+/* DATE DIV */
+.date-div{text-align:center;margin:3px 0;}
+.date-div span{font-size:9px;color:var(--text-dim);background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:2px 10px;}
+
+/* MSG */
+.msg{display:flex;gap:8px;max-width:90%;animation:msgIn 0.3s ease;}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.msg.ai{align-self:flex-start;}
+.msg-av{width:27px;height:27px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.msg.ai .msg-av{background:linear-gradient(135deg,#00ff88,#00bfff);color:#000;font-weight:900;}
+.msg.user .msg-av{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;}
+.msg-body{display:flex;flex-direction:column;gap:2px;}
+.msg-label{font-size:8px;font-weight:700;color:var(--text-dim);padding:0 3px;letter-spacing:0.5px;}
+.msg.user .msg-label{text-align:right;}
+.bubble{padding:9px 13px;border-radius:8px;font-size:12px;line-height:1.7;}
+.msg.ai .bubble{background:var(--bubble-ai);border:1px solid var(--border2);color:var(--text);border-top-left-radius:2px;}
+.msg.user .bubble{background:var(--bubble-user);border:1px solid rgba(124,58,237,0.25);color:var(--text-hi);border-top-right-radius:2px;}
+.bubble strong{color:var(--text-hi);}
+.bubble code{background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.12);padding:1px 5px;border-radius:3px;font-size:11px;color:var(--green);font-family:'Share Tech Mono',monospace;}
+.bubble pre{background:#020408;border:1px solid var(--border);border-radius:6px;padding:10px;margin-top:7px;overflow-x:auto;font-size:11px;color:#7ee787;line-height:1.5;font-family:'Share Tech Mono',monospace;}
+.bubble ul,.bubble ol{padding-left:16px;margin-top:3px;}
+.bubble li{margin-bottom:2px;}
+.bubble h3{color:var(--green);margin:8px 0 4px;font-size:13px;letter-spacing:0.5px;}
+.bubble .warn{color:var(--yellow);}
+.bubble .crit{color:var(--red);}
+.bubble .info{color:var(--blue);}
+.msg-meta{font-size:8px;color:var(--text-dim);padding:0 3px;display:flex;gap:5px;align-items:center;}
+.msg.user .msg-meta{justify-content:flex-end;}
+.topic-tag{padding:1px 5px;border-radius:3px;font-size:8px;font-weight:700;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.15);color:var(--green);}
+
+/* TYPING */
+.typing{display:flex;gap:4px;align-items:center;padding:10px 13px;}
+.t-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:typingDot 1.2s infinite;box-shadow:0 0 5px rgba(0,255,136,0.4);}
+.t-dot:nth-child(2){animation-delay:0.15s;}.t-dot:nth-child(3){animation-delay:0.3s;}
+
+/* INPUT */
+.input-area{padding:9px 12px 12px;background:rgba(13,17,23,0.97);border-top:1px solid var(--border);flex-shrink:0;position:relative;z-index:10;}
+.voice-status{display:none;align-items:center;gap:6px;padding:6px 10px;margin-bottom:6px;background:rgba(255,68,68,0.07);border:1px solid rgba(255,68,68,0.2);border-radius:6px;font-size:10px;color:#fca5a5;font-weight:700;}
+.voice-status.active{display:flex;}
+.v-dot{width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0;animation:voicePulse 1s infinite;}
+.vwaves{display:flex;gap:2px;align-items:center;height:13px;}
+.vw{width:3px;background:var(--red);border-radius:2px;animation:wave 0.8s ease-in-out infinite;}
+.vw:nth-child(1){height:5px;animation-delay:0s;}.vw:nth-child(2){height:10px;animation-delay:0.1s;}.vw:nth-child(3){height:7px;animation-delay:0.2s;}.vw:nth-child(4){height:12px;animation-delay:0.3s;}.vw:nth-child(5){height:5px;animation-delay:0.4s;}
+.vstop{margin-left:auto;background:rgba(255,68,68,0.15);border:1px solid rgba(255,68,68,0.3);border-radius:4px;padding:2px 7px;color:#fca5a5;font-size:9px;cursor:pointer;font-family:'Share Tech Mono',monospace;}
+.input-row{display:flex;gap:7px;align-items:flex-end;background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;transition:border-color 0.2s,box-shadow 0.2s;}
+.input-row:focus-within{border-color:var(--green);box-shadow:0 0 0 2px rgba(0,255,136,0.08);}
+.icon-btn{background:none;border:none;font-size:17px;cursor:pointer;opacity:0.4;transition:all 0.2s;padding:2px;flex-shrink:0;color:var(--green);}
+.icon-btn:hover{opacity:1;}
+.icon-btn.recording{opacity:1;animation:voicePulse 0.8s ease-in-out infinite;}
+textarea#userInput{flex:1;background:none;border:none;outline:none;color:var(--text-hi);font-family:'Share Tech Mono',monospace;font-size:12px;resize:none;line-height:1.5;max-height:110px;caret-color:var(--green);}
+textarea#userInput::placeholder{color:var(--text-dim);}
+.send-btn{width:32px;height:32px;border-radius:6px;background:linear-gradient(135deg,#00ff88,#00bfff);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 0 10px rgba(0,255,136,0.3);transition:all 0.2s;flex-shrink:0;color:#000;font-weight:900;}
+.send-btn:hover{transform:scale(1.06);box-shadow:0 0 18px rgba(0,255,136,0.5);}
+.send-btn:disabled{opacity:0.3;cursor:not-allowed;transform:none;}
+.input-footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:8px;color:var(--text-dim);letter-spacing:0.3px;}
+.disclaimer{color:rgba(255,215,0,0.5);font-size:8px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--bg2);border:1px solid var(--green);border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700;color:var(--green);z-index:200;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;max-width:92vw;text-align:center;font-family:'Share Tech Mono',monospace;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* LANG MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;width:100%;max-width:440px;max-height:80vh;overflow-y:auto;}
+.modal-title{font-size:14px;font-weight:900;color:var(--green);margin-bottom:3px;letter-spacing:1px;}
+.modal-sub{font-size:10px;color:var(--text-dim);margin-bottom:12px;}
+.lang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.lang-opt{padding:8px 5px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);text-align:center;cursor:pointer;font-size:10px;font-weight:700;color:var(--text-dim);transition:all 0.15s;font-family:'Share Tech Mono',monospace;}
+.lang-opt:hover{border-color:var(--green);color:var(--green);}
+.flag{font-size:16px;display:block;margin-bottom:2px;}
+.modal-close{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:10px;cursor:pointer;margin-top:10px;}
+
+/* CERT BADGE */
+.cert-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;justify-content:center;}
+.cert{padding:3px 8px;border-radius:3px;font-size:8px;font-weight:700;letter-spacing:0.5px;border:1px solid;}
+.cert.green{background:rgba(0,255,136,0.08);border-color:rgba(0,255,136,0.2);color:var(--green);}
+.cert.blue{background:rgba(0,191,255,0.08);border-color:rgba(0,191,255,0.2);color:var(--blue);}
+.cert.yellow{background:rgba(255,215,0,0.08);border-color:rgba(255,215,0,0.2);color:var(--yellow);}
+.cert.purple{background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.2);color:var(--purple);}
+
+@media(max-width:480px){.msg{max-width:96%;}.lang-grid{grid-template-columns:repeat(2,1fr);}.live-date{display:none;}.roadmap{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo-block">
+    <div class="logo-icon">🛡️</div>
+    <div>
+      <div class="logo-name">G11D SECURITY AI</div>
+      <div class="logo-sub">ETHICAL HACKING TRAINER · BY AGNIPROTOCOL TECH</div>
+    </div>
+  </div>
+  <div class="live-dt">
+    <div class="live-time" id="clockTime">--:--:--</div>
+    <div class="live-date" id="clockDate"></div>
+  </div>
+  <div class="topbar-right">
+    <div class="status-pill online" id="statusPill"><div class="s-dot"></div><span id="statusText">ONLINE</span></div>
+    <button class="t-btn" onclick="openLang()">🌍 Lang</button>
+  </div>
+</div>
+
+<!-- TOPIC BAR -->
+<div class="topics-bar">
+  <div class="topic active" onclick="setTopic('general',this)">⚡ All Topics</div>
+  <div class="topic" onclick="setTopic('basics',this)">📖 Basics</div>
+  <div class="topic" onclick="setTopic('recon',this)">🌐 Recon</div>
+  <div class="topic" onclick="setTopic('web',this)">🕸️ Web Hacking</div>
+  <div class="topic" onclick="setTopic('api',this)">🔌 API Security</div>
+  <div class="topic" onclick="setTopic('idor',this)">🕳️ IDOR</div>
+  <div class="topic" onclick="setTopic('xss',this)">💉 XSS</div>
+  <div class="topic" onclick="setTopic('sqli',this)">🗄️ SQLi</div>
+  <div class="topic" onclick="setTopic('ssrf',this)">🔄 SSRF</div>
+  <div class="topic" onclick="setTopic('csrf',this)">🎭 CSRF</div>
+  <div class="topic" onclick="setTopic('lfi',this)">📁 LFI/RFI</div>
+  <div class="topic" onclick="setTopic('rce',this)">💥 RCE</div>
+  <div class="topic" onclick="setTopic('auth',this)">🔐 Auth Bypass</div>
+  <div class="topic" onclick="setTopic('jwt',this)">🎫 JWT</div>
+  <div class="topic" onclick="setTopic('graphql',this)">🔷 GraphQL</div>
+  <div class="topic" onclick="setTopic('android',this)">📱 Android</div>
+  <div class="topic" onclick="setTopic('network',this)">🖧 Network</div>
+  <div class="topic" onclick="setTopic('waf',this)">🛡️ WAF Bypass</div>
+  <div class="topic" onclick="setTopic('osint',this)">🔍 OSINT</div>
+  <div class="topic" onclick="setTopic('privesc',this)">⬆️ PrivEsc</div>
+  <div class="topic" onclick="setTopic('crypto',this)">🔑 Cryptography</div>
+  <div class="topic" onclick="setTopic('forensics',this)">🧪 Forensics</div>
+  <div class="topic" onclick="setTopic('ctf',this)">🏆 CTF</div>
+  <div class="topic" onclick="setTopic('report',this)">📋 Report Writing</div>
+  <div class="topic" onclick="setTopic('bounty',this)">💰 Bug Bounty</div>
+  <div class="topic" onclick="setTopic('tools',this)">🔧 Tools</div>
+  <div class="topic" onclick="setTopic('python',this)">🐍 Python Hacking</div>
+  <div class="topic" onclick="setTopic('burp',this)">🔫 Burp Suite</div>
+  <div class="topic" onclick="setTopic('nmap',this)">📡 Nmap/Masscan</div>
+  <div class="topic" onclick="setTopic('interview',this)">🎯 Job/Interview</div>
+</div>
+
+<!-- MESSAGES -->
+<div class="messages" id="msgs">
+  <div class="welcome" id="welcome">
+    <div class="w-banner">
+      <div class="w-title">🛡️ G11D SECURITY AI</div>
+      <div class="w-dt" id="welcomeDt">📅 Loading...</div>
+      <div class="w-sub">
+        Tumcha <strong style="color:var(--green);">Personal Ethical Hacking Trainer</strong> — by AgniProtocol Tech 🔥<br>
+        Beginner to Advanced — sab kuch shikveel. Marathi, Hindi, English — koni bhi bhashet!<br>
+        <span style="color:var(--yellow);">⚠️ Only for ethical, authorized security research.</span>
+      </div>
+      <div class="cert-row">
+        <span class="cert green">OWASP TOP 10</span>
+        <span class="cert blue">BUG BOUNTY</span>
+        <span class="cert yellow">CTF TRAINING</span>
+        <span class="cert purple">ANDROID PENTEST</span>
+        <span class="cert green">WAF BYPASS</span>
+        <span class="cert blue">API SECURITY</span>
+        <span class="cert yellow">REPORT WRITING</span>
+        <span class="cert purple">OSINT</span>
+      </div>
+    </div>
+    <div class="roadmap">
+      <div class="rm-card" onclick="quickAsk('Ethical hacking suru karychy aahe — Beginner roadmap saang 🗺️')">
+        <div class="rm-icon">🗺️</div>
+        <div class="rm-title">Learning Roadmap</div>
+        <div class="rm-level">BEGINNER → PRO</div>
+      </div>
+      <div class="rm-card" onclick="quickAsk('IDOR vulnerability kasa dhundhtaat? Full methodology saang 🕳️')">
+        <div class="rm-icon">🕳️</div>
+        <div class="rm-title">IDOR Hunting</div>
+        <div class="rm-level">WEB HACKING</div>
+      </div>
+      <div class="rm-card" onclick="quickAsk('XSS WAF bypass payloads saang — Cloudflare bypass 💉')">
+        <div class="rm-icon">💉</div>
+        <div class="rm-title">XSS + WAF Bypass</div>
+        <div class="rm-level">ADVANCED</div>
+      </div>
+      <div class="rm-card" onclick="quickAsk('HackerOne var report kasa lihaychay? Template de 📋')">
+        <div class="rm-icon">📋</div>
+        <div class="rm-title">Report Writing</div>
+        <div class="rm-level">BUG BOUNTY</div>
+      </div>
+      <div class="rm-card" onclick="quickAsk('API security testing kashi karaychay — full methodology 🔌')">
+        <div class="rm-icon">🔌</div>
+        <div class="rm-title">API Security</div>
+        <div class="rm-level">REST/GraphQL</div>
+      </div>
+      <div class="rm-card" onclick="quickAsk('Android app pentest kasa karaychay? Steps saang 📱')">
+        <div class="rm-icon">📱</div>
+        <div class="rm-title">Android Pentest</div>
+        <div class="rm-level">MOBILE SECURITY</div>
+      </div>
+      <div class="rm-card" onclick="quickAsk('Burp Suite setup aani vaaparchya tips saang 🔫')">
+        <div class="rm-icon">🔫</div>
+        <div class="rm-title">Burp Suite</div>
+        <div class="rm-level">ESSENTIAL TOOL</div>
+      </div>
+      <div class="rm-card" onclick="quickAsk('CTF challenges kase sodivaychay? Beginner tips de 🏆')">
+        <div class="rm-icon">🏆</div>
+        <div class="rm-title">CTF Guide</div>
+        <div class="rm-level">PRACTICE + WIN</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INPUT -->
+<div class="input-area">
+  <div class="voice-status" id="voiceStatus">
+    <div class="v-dot"></div>
+    <div class="vwaves"><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div></div>
+    <span id="voiceText">Bola... 👂</span>
+    <button class="vstop" onclick="stopVoice()">■ Stop</button>
+  </div>
+  <div class="input-row">
+    <button class="icon-btn" id="micBtn" onclick="toggleVoice()" title="Voice">🎤</button>
+    <textarea id="userInput" rows="1" placeholder="Vulnerability, tool, topic — kahi pan vichar... Marathi/Hindi/English" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="send-btn" id="sendBtn" onclick="send()">➤</button>
+  </div>
+  <div class="input-footer">
+    <span>G11D SECURITY AI · AgniProtocol Tech · Ganpat Darade</span>
+    <span class="disclaimer">⚠️ Ethical use only — Authorized targets only</span>
+  </div>
+</div>
+
+<!-- LANG MODAL -->
+<div class="modal-bg" id="langModal">
+  <div class="modal">
+    <div class="modal-title">🌍 LANGUAGE SELECT</div>
+    <div class="modal-sub">Tumchi bhasha — tych bhashet shikvuya!</div>
+    <div class="lang-grid">
+      <div class="lang-opt" onclick="setLang('मराठी','mr','mr-IN')"><span class="flag">🇮🇳</span>मराठी</div>
+      <div class="lang-opt" onclick="setLang('हिंदी','hi','hi-IN')"><span class="flag">🇮🇳</span>हिंदी</div>
+      <div class="lang-opt" onclick="setLang('English','en','en-US')"><span class="flag">🇺🇸</span>English</div>
+      <div class="lang-opt" onclick="setLang('বাংলা','bn','bn-BD')"><span class="flag">🇧🇩</span>বাংলা</div>
+      <div class="lang-opt" onclick="setLang('தமிழ்','ta','ta-IN')"><span class="flag">🇮🇳</span>தமிழ்</div>
+      <div class="lang-opt" onclick="setLang('తెలుగు','te','te-IN')"><span class="flag">🇮🇳</span>తెలుగు</div>
+      <div class="lang-opt" onclick="setLang('Español','es','es-ES')"><span class="flag">🇪🇸</span>Español</div>
+      <div class="lang-opt" onclick="setLang('Français','fr','fr-FR')"><span class="flag">🇫🇷</span>Français</div>
+      <div class="lang-opt" onclick="setLang('العربية','ar','ar-SA')"><span class="flag">🇸🇦</span>العربية</div>
+    </div>
+    <div style="text-align:right;"><button class="modal-close" onclick="closeLang()">CLOSE ✕</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ CLOCK ══
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function getFullDT(){
+  const d=new Date();const p=n=>String(n).padStart(2,'0');
+  return{time:`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`,date:`${DAYS[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`,hour:d.getHours(),d};
+}
+function tickClock(){
+  const{time,date,hour}=getFullDT();
+  document.getElementById('clockTime').textContent=time;
+  document.getElementById('clockDate').textContent=date;
+  const wdt=document.getElementById('welcomeDt');
+  const g=hour<5?'Night 🌙':hour<12?'Subh Sakal ☀️':hour<17?'Afternoon 🌤️':hour<20?'Evening 🌇':'Night 🌙';
+  if(wdt)wdt.textContent=`📅 ${date}  ·  🕐 ${time}  ·  ${g}`;
+}
+tickClock();setInterval(tickClock,1000);
+
+// ══ STATE ══
+let topic='general';
+let langCode='mr',langLocale='mr-IN',langName='मराठी';
+let isLoading=false;
+let history=[];
+let recognition=null,isRecording=false;
+let lastDate='';
+
+// ══ HELPERS ══
+function autoResize(el){el.style.height='';el.style.height=Math.min(el.scrollHeight,110)+'px';}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
+function setTopic(t,el){
+  topic=t;
+  document.querySelectorAll('.topic').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+}
+function setLang(name,code,locale){langName=name;langCode=code;langLocale=locale;closeLang();showToast('✅ '+name);}
+function openLang(){document.getElementById('langModal').classList.add('open');}
+function closeLang(){document.getElementById('langModal').classList.remove('open');}
+document.getElementById('langModal').addEventListener('click',function(e){if(e.target===this)closeLang();});
+function quickAsk(t){document.getElementById('userInput').value=t;send();}
+function showToast(msg,dur=2600){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+window.addEventListener('online',()=>{document.getElementById('statusPill').className='status-pill online';document.getElementById('statusText').textContent='ONLINE';showToast('✅ Connected!');});
+window.addEventListener('offline',()=>{document.getElementById('statusPill').className='status-pill offline';document.getElementById('statusText').textContent='OFFLINE';showToast('⚠️ No internet!');});
+
+// ══ MESSAGES ══
+function hideWelcome(){const w=document.getElementById('welcome');if(w)w.remove();}
+function maybeDate(){
+  const today=`${DAYS[new Date().getDay()]}, ${new Date().getDate()} ${MONTHS[new Date().getMonth()]} ${new Date().getFullYear()}`;
+  if(lastDate!==today){lastDate=today;const msgs=document.getElementById('msgs');const d=document.createElement('div');d.className='date-div';d.innerHTML=`<span>📅 ${today}</span>`;msgs.appendChild(d);}
+}
+function addMsg(role,html){
+  hideWelcome();maybeDate();
+  const msgs=document.getElementById('msgs');
+  const div=document.createElement('div');div.className=`msg ${role}`;
+  const{time}=getFullDT();
+  const av=role==='ai'?'🛡️':'👤';
+  const name=role==='ai'?'SECURITY AI':'YOU';
+  const tTag=`<span class="topic-tag">${topic.toUpperCase()}</span>`;
+  div.innerHTML=`<div class="msg-av">${av}</div><div class="msg-body"><div class="msg-label">${name}</div><div class="bubble">${html}</div><div class="msg-meta">${role==='ai'?tTag:''}<span>🕐 ${time}</span></div></div>`;
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+function addTyping(){
+  hideWelcome();const msgs=document.getElementById('msgs');
+  const div=document.createElement('div');div.className='msg ai';div.id='typing-ind';
+  div.innerHTML=`<div class="msg-av">🛡️</div><div class="msg-body"><div class="msg-label">SECURITY AI</div><div class="bubble"><div class="typing"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div></div></div>`;
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+function removeTyping(){const t=document.getElementById('typing-ind');if(t)t.remove();}
+function mdToHtml(t){
+  return t
+    .replace(/```[\w]*\n?([\s\S]*?)```/g,'<pre>$1</pre>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/^#{1,3}\s(.+)$/gm,'<h3>$1</h3>')
+    .replace(/^[-•]\s(.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>)+/gs,m=>`<ul>${m}</ul>`)
+    .replace(/⚠️(.*)/g,'<span class="warn">⚠️$1</span>')
+    .replace(/🔴(.*)/g,'<span class="crit">🔴$1</span>')
+    .replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
+}
+
+// ══ MEGA ETHICAL HACKING SYSTEM PROMPT ══
+const TOPIC_SKILLS={
+  general:`All ethical hacking topics — beginner to advanced expert level`,
+  basics:`Ethical hacking fundamentals: CIA triad, types of hackers, penetration testing phases (Recon→Scan→Exploit→Post-exploit→Report), legal frameworks (IT Act 2000, CFAA), responsible disclosure, CVE/CVSS scoring, bug bounty basics, setting up Kali Linux, essential mindset`,
+  recon:`Passive & Active Reconnaissance: Google Dorks, Shodan, Censys, WHOIS, DNS enumeration (dig, nslookup, dnsx), subdomain enumeration (subfinder, amass, assetfinder, dnsx, chaos), certificate transparency (crt.sh), Wayback Machine, GAU, waymore, GitHub dorking, LinkedIn OSINT, favicon hash lookup, HTTP probe (httpx), port scanning (nmap, masscan, rustscan), banner grabbing, technology fingerprinting (Wappalyzer, whatweb)`,
+  web:`Web application hacking: HTTP methods, request/response analysis, cookies & sessions, same-origin policy, CORS misconfigurations, clickjacking, HTTP request smuggling, CRLF injection, host header injection, open redirects, subdomain takeover, path traversal, file upload vulnerabilities, XXE injection, template injection (SSTI), deserialization, prototype pollution`,
+  api:`API Security Testing: REST API testing methodology, GraphQL introspection & injection, SOAP vulnerabilities, API key exposure, verb tampering (GET→POST→DELETE), mass assignment, rate limiting bypass, BOLA/BFLA (Broken Object Level/Function Level Authorization), API versioning flaws, JWT attacks, OAuth 2.0 misconfigurations, API documentation leaks (Swagger, Postman collections), ffuf/kiterunner for API fuzzing`,
+  idor:`IDOR (Insecure Direct Object Reference) — Complete Methodology: Understanding BOLA vs IDOR, ID types (integer, UUID, hash, base64, sequential), horizontal vs vertical privilege escalation, parameter pollution, JSON body IDOR, header-based IDOR, HTTP method switching, multi-step IDOR, chained IDOR, blind IDOR (email/webhook), Burp Suite automation for IDOR, real bug bounty IDOR examples, HackerOne/Bugcrowd IDOR reports`,
+  xss:`Cross-Site Scripting — Complete: Reflected XSS, Stored XSS, DOM-based XSS, Blind XSS (XSS Hunter), CSP bypass techniques, WAF bypass payloads (Cloudflare, Akamai, AWS WAF, ModSecurity), context-specific payloads (HTML, JS, attribute, URL, CSS contexts), XSS to account takeover, cookie stealing, keylogging, BeEF framework, XSS chaining with CSRF, dalfox, XSStrike tools`,
+  sqli:`SQL Injection — Complete: Error-based, Union-based, Blind Boolean, Blind Time-based, Out-of-band SQLi, Second-order SQLi, sqlmap usage & tamper scripts, WAF bypass for SQLi, NoSQL injection (MongoDB), ORM injection, stored procedure injection, SQL truncation attacks, database fingerprinting, data exfiltration, reading/writing files, OS command execution via SQLi`,
+  ssrf:`SSRF — Server Side Request Forgery: Basic SSRF, Blind SSRF, SSRF via redirect chains, SSRF to internal network scanning, SSRF to AWS metadata (169.254.169.254), GCP/Azure metadata endpoints, SSRF filter bypasses (IP encoding, DNS rebinding, redirect chains, IPv6), SSRF to RCE, SSRF in PDF generators, webhooks, URL imports, Gopher protocol SSRF, SSRF automation`,
+  csrf:`CSRF — Cross Site Request Forgery: CSRF token bypass techniques, SameSite cookie bypass, Referer header bypass, JSON CSRF, CSRF via CORS, CSRF in file upload, CSRF chaining for account takeover, PoC generation, difference between CSRF and clickjacking`,
+  lfi:`LFI/RFI/Path Traversal: Local File Inclusion, Remote File Inclusion, Path Traversal (../), PHP wrapper abuse (/proc/self/environ, php://filter, php://input, expect://), log poisoning, null byte injection, encoding bypass, LFI to RCE, sensitive file paths (/etc/passwd, web.config, .env, .git/config), directory listing`,
+  rce:`Remote Code Execution: OS command injection (blind, error-based), RCE via SSTI (Jinja2, Twig, Freemarker, Velocity), deserialization RCE (Java, PHP, Python, .NET), file upload RCE (.php, .jsp, .aspx webshells), RCE via LFI, RCE via XXE, reverse shells (bash, nc, Python, PHP), bind vs reverse shell, shell stabilization, RCE bypass techniques`,
+  auth:`Authentication & Authorization Bypass: Username enumeration, password brute force, credential stuffing, MFA bypass (OTP reuse, backup code, SIM swap), session fixation, session hijacking, cookie manipulation, insecure "remember me", account lockout bypass, OAuth misconfig, SAML vulnerabilities, password reset flaws (host header injection, token predictability, expired token reuse), 2FA bypass techniques`,
+  jwt:`JWT Security: JWT structure (header.payload.signature), algorithm confusion attacks (RS256→HS256, none algorithm), weak secret brute force (hashcat, jwt_tool), JWT injection, kid parameter injection (SQLi, path traversal), claim manipulation, JWT in GraphQL, tools: jwt_tool, hashcat, CyberChef`,
+  graphql:`GraphQL Security: Introspection queries, schema extraction, query depth attacks, batching attacks, field suggestions, authorization bypass in resolvers, GraphQL injection, IDOR via GraphQL, mass assignment, GraphQL SSRF, Altair/GraphiQL exploration, graphql-cop scanner`,
+  android:`Android Pentesting: APK extraction & decompilation (jadx, apktool), AndroidManifest.xml analysis, exported components (Activities, Services, Providers, Receivers), insecure data storage (SharedPreferences, SQLite, logs, external storage), traffic interception (Burp + Android proxy), SSL pinning bypass (Frida, objection, APKiD), deep link vulnerabilities, WebView attacks, intent hijacking, root detection bypass, MobSF, Drozer`,
+  network:`Network Pentesting: ARP spoofing, MITM attacks, Wireshark packet analysis, Ettercap, SSL stripping, DNS spoofing, WiFi attacks (WPA2 cracking with aircrack-ng, evil twin, deauth), VLAN hopping, SMB attacks (EternalBlue, pass-the-hash), RDP vulnerabilities, SNMP enumeration, FTP/Telnet attacks, lateral movement, pivoting (SSH tunneling, Chisel, sshuttle)`,
+  waf:`WAF Bypass Techniques: Cloudflare bypass, Akamai bypass, AWS WAF bypass, ModSecurity bypass, encoding tricks (URL, double URL, Unicode, HTML entity), case variation, keyword splitting, whitespace tricks, comment injection, HTTP parameter pollution, chunked transfer encoding, JSON/XML payload obfuscation, IP rotation, custom headers, timing attacks to detect WAF rules`,
+  osint:`OSINT — Open Source Intelligence: Google Dorks (full list), Shodan/Censys/FOFA, theHarvester, Maltego, SpiderFoot, social media OSINT (Twitter, LinkedIn, Facebook), email verification (hunter.io), phone OSINT, image OSINT (reverse image search, metadata), document metadata (exiftool), GitHub OSINT (truffleHog, gitrob), dark web OSINT basics, OSINT for bug bounty recon`,
+  privesc:`Privilege Escalation: Linux PrivEsc (SUID/SGID binaries, sudo -l, cron jobs, writable paths, kernel exploits, capabilities, PATH hijacking, weak file permissions, GTFOBins), Windows PrivEsc (token impersonation, AlwaysInstallElevated, unquoted service paths, DLL hijacking, WinPEAS, PowerUp), Post-exploitation (persistence, lateral movement, data exfiltration)`,
+  crypto:`Cryptography in Security: Hash cracking (MD5, SHA1, bcrypt — hashcat, john), weak encryption detection, ECB mode oracle attack, padding oracle attack, RSA vulnerabilities (low exponent, common factor, Wiener's attack), XOR cipher analysis, encoding vs encryption vs hashing, SSL/TLS vulnerabilities (BEAST, POODLE, Heartbleed), certificate analysis`,
+  forensics:`Digital Forensics: Memory forensics (Volatility), disk imaging (dd, FTK Imager), file carving (Autopsy, Scalpel), log analysis, network forensics (Wireshark, NetworkMiner), steganography (steghide, stegsolve, binwalk), metadata analysis (exiftool), CTF forensics challenges, evidence preservation, chain of custody`,
+  ctf:`CTF (Capture The Flag) Guide: CTF categories (Web, Pwn, Reverse, Crypto, Forensics, OSINT, Misc), tools per category, CTF platforms (HackTheBox, TryHackMe, picoCTF, CTFtime, VulnHub), web CTF methodology, binary exploitation basics (buffer overflow, ret2win), reverse engineering basics (Ghidra, IDA), CTF writeup strategy, team coordination`,
+  report:`Bug Bounty Report Writing: HackerOne/Bugcrowd report format, CVSS scoring (v3.1), severity classification (Critical/High/Medium/Low/Info), writing clear steps to reproduce, impact assessment, PoC code/screenshots, recommendations, triager communication, handling duplicate reports, escalation, response to triagers, markdown formatting for reports, real report examples`,
+  bounty:`Bug Bounty Strategy: Choosing programs (scope, payout, competition), HackerOne vs Bugcrowd vs Intigriti vs Synack, private programs, VDP vs paid programs, target selection strategy, finding low-hanging fruit, avoiding duplicates, time management, automation (nuclei, custom scripts), collaboration, disclosure process, reputation building, earning Hall of Fame`,
+  tools:`Security Tools Mastery: Burp Suite Pro (intercepting proxy, scanner, extensions, macros, intruder, repeater), nmap (all flags, NSE scripts), sqlmap (tamper scripts, risk/level), ffuf (fuzzing, wordlists, filters), subfinder/amass/assetfinder (subdomain enum), httpx (probing), nuclei (templates, custom templates), Metasploit (search, use, options, exploit, sessions), hashcat (modes, rules), John the Ripper, Hydra (brute force), netcat/ncat, gobuster/dirsearch, waybackurls/gau/waymore, katana (crawling), dalfox (XSS), jwt_tool, arjun (parameter discovery), ParamSpider, Caido`,
+  python:`Python for Hacking: Writing custom scanners, HTTP request automation (requests library), web scraping for recon, automated IDOR testing script, XSS payload fuzzer, subdomain brute forcer, port scanner, JWT brute forcer, webhook listener, payload encoder/decoder, custom wordlist generator, Burp Suite extension in Python (Jython), exploit scripting, reverse shell in Python, socket programming for hacking`,
+  burp:`Burp Suite Mastery: Installation & license, proxy setup (browser, Android), intercepting requests, Repeater usage, Intruder (attack types: Sniper/Battering ram/Pitchfork/Cluster bomb), Scanner (active/passive), Decoder, Comparer, Sequencer, Extensions (Turbo Intruder, AuthMatrix, ActiveScan++, Logger++, Retire.js, Param Miner, JS Beautifier), Macros for CSRF tokens, Burp collaborator, Project files & settings`,
+  nmap:`Nmap & Network Scanning: Basic scan types (-sS, -sT, -sU, -sA), OS detection (-O), service version (-sV), aggressive scan (-A), timing (-T0 to -T5), NSE scripts (--script), output formats (-oN -oX -oG), Masscan for fast scanning, Rustscan, Nmap for CTF, banner grabbing, firewall detection, stealth scanning techniques`,
+  interview:`Security Job & Interview Prep: Common interview questions (OWASP, explain vulnerabilities, scenario-based), bug bounty portfolio building, resume tips for security roles, CEH/OSCP/eWPT certifications path, LinkedIn optimization for security, networking in security community, HackerOne reputation building, GitHub security portfolio, salary negotiation for pentesters, freelance pentesting, starting a security company`,
+};
+
+function buildSystem(){
+  const{date,hour,d}=getFullDT();
+  const g=hour<5?'Night 🌙':hour<12?'Subh Sakal ☀️':hour<17?'Afternoon 🌤️':hour<20?'Evening 🌇':'Night 🌙';
+  const topicDetail=TOPIC_SKILLS[topic]||TOPIC_SKILLS.general;
+
+  return`You are G11D Security AI — the world's best Ethical Hacking Trainer, created by Ganpat Darade (AgniProtocol Tech, Maharashtra, India). You are Ganpat's personal AI security mentor.
+
+━━ REAL-TIME CONTEXT ━━
+Date: ${date} | Time: ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')} | ${g}
+Day: ${DAYS[d.getDay()]} | Timezone: IST (India)
+
+━━ ABOUT GANPAT DARADE (Your Student & Creator) ━━
+- Security Researcher, Founder of AgniProtocol Tech
+- 4+ years experience in manual vulnerability assessment & automated bug hunting
+- Bug bounty credits: Google VRP Hall of Fame, HackerOne (8 verified reports, 2 live), Bugcrowd
+- Expertise: Web, API & Android pentesting, WAF evasion, protocol fuzzing
+- Built 17+ Python security tools including GanpatAI, BugHunter-Pro-Agni
+- GitHub: agniprotocoltech-star | HackerOne: agniprotocoltech
+- Certifications: Android Pentesting, Ethical Hacking (Udemy, Tutedude), Python
+- Previously found: Anthropic /api/bootstrap unauthenticated endpoint (HackerOne #3878140)
+
+━━ CURRENT TOPIC ━━
+${topicDetail}
+
+━━ LANGUAGE RULES (CRITICAL) ━━
+- ALWAYS detect and match the user's language/script exactly
+- Marathi → Marathi (Devanagari) | Hindi → Hindi | English → English
+- Mixed Marathi+Hindi+English casual style → match exactly
+- NEVER switch unless user switches
+- Use technical terms in English even in Marathi/Hindi explanations (industry standard)
+
+━━ TEACHING STYLE ━━
+- You are Ganpat's senior mentor — treat him as an intermediate-to-advanced learner
+- Give REAL, PRACTICAL knowledge — not vague theory
+- Include actual commands, payloads, tools (where educational and ethical)
+- Use examples from real bug bounty reports when relevant
+- Format: clear headings, code blocks for commands/payloads, numbered steps
+- For each vulnerability: Concept → How to find → Methodology → Tools → Real example → Report tip
+- Always mention: scope/authorization required, responsible disclosure
+- Motivate: "Bhai tu kar shaktos — tuzya reports proof aahes!"
+
+━━ ETHICAL BOUNDARIES ━━
+- Only teach for AUTHORIZED, ETHICAL security testing
+- Always remind: test only on programs you're authorized for
+- No help for attacking systems without permission
+- Responsible disclosure is mandatory
+- Legal framework: IT Act 2000 (India), bug bounty program terms
+
+━━ KNOWLEDGE DEPTH ━━
+You have expert-level knowledge of:
+OWASP Top 10 (2021), CVE database, Exploit-DB, HackerOne disclosed reports, Bugcrowd University, PortSwigger Web Security Academy, PentesterLab, TryHackMe, HackTheBox, all major security tools, Python scripting for security, Android security, network protocols, cryptography, forensics, CTF challenges, bug bounty platforms & strategies`;
+}
+
+// ══ API KEY — PERMANENT ══
+const AK='g11d_or_key_v1';
+let API_KEY='';
+function getKeyFromCookie(){const m=document.cookie.match(/g11d_key=([^;]+)/);return m?decodeURIComponent(m[1]):'';}
+function loadKey(){
+  API_KEY=localStorage.getItem(AK)||sessionStorage.getItem(AK)||getKeyFromCookie()||'';
+  if(!API_KEY)showSetup();
+}
+function showSetup(){
+  let s=document.getElementById('setupScr');
+  if(!s){
+    s=document.createElement('div');s.id='setupScr';
+    s.style.cssText='position:fixed;inset:0;z-index:9000;background:#060a0e;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:14px;';
+    s.innerHTML=`<div style="font-size:50px">🛡️</div>
+    <div style="font-size:20px;font-weight:900;color:#00ff88;letter-spacing:2px;font-family:Share Tech Mono,monospace;">G11D SECURITY AI</div>
+    <div style="font-size:11px;color:#4a5568;text-align:center;max-width:300px;line-height:1.6;font-family:Share Tech Mono,monospace;">OpenRouter API Key enter kara — FREE!</div>
+    <input id="secKey" type="password" placeholder="sk-or-v1-..." style="width:100%;max-width:340px;background:#0d1117;border:1.5px solid #1e2d3d;border-radius:8px;padding:12px;color:#e6edf3;font-family:Share Tech Mono,monospace;font-size:12px;outline:none;" autocomplete="off"/>
+    <button onclick="saveKey()" style="width:100%;max-width:340px;background:linear-gradient(135deg,#00ff88,#00bfff);border:none;border-radius:8px;padding:12px;color:#000;font-family:Share Tech Mono,monospace;font-size:13px;font-weight:900;cursor:pointer;">🚀 START HACKING</button>
+    <div style="font-size:10px;color:#4a5568;font-family:Share Tech Mono,monospace;">openrouter.ai/keys — FREE key, no card needed 🔒</div>`;
+    document.body.appendChild(s);
+  } else s.style.display='flex';
+}
+function saveKey(){
+  const k=document.getElementById('secKey')?.value?.trim();
+  if(!k||k.length<10){showToast('Valid key enter kara!');return;}
+  API_KEY=k;
+  localStorage.setItem(AK,k);sessionStorage.setItem(AK,k);
+  document.cookie=`g11d_key=${encodeURIComponent(k)};max-age=31536000;path=/;SameSite=Lax`;
+  document.getElementById('setupScr').style.display='none';
+  showToast('✅ Key saved! Happy Hunting! 🎯');
+}
+
+// ══ OPENROUTER API ══
+async function callClaude(userMsg){
+  if(!API_KEY){showSetup();throw new Error('API Key nahi!');}
+  history.push({role:'user',content:userMsg});
+  const trimmed=history.slice(-16);
+  const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':`Bearer ${API_KEY}`,
+      'HTTP-Referer':'https://agniprotocoltech-star.github.io/g11d-app/',
+      'X-Title':'G11D Security AI'
+    },
+    body:JSON.stringify({
+      model:'openrouter/auto',
+      messages:[{role:'system',content:buildSystem()},...trimmed],
+      max_tokens:1200,temperature:0.8
+    })
+  });
+  if(!res.ok){
+    const e=await res.json().catch(()=>({}));
+    if(res.status===401||res.status===403){showSetup();showToast('⚠️ Key invalid!');}
+    throw new Error(e.error?.message||'API error '+res.status);
+  }
+  const data=await res.json();
+  const reply=data.choices?.[0]?.message?.content||'...';
+  history.push({role:'assistant',content:reply});
+  return reply;
+}
+
+// ══ VOICE ══
+function toggleVoice(){
+  if(isRecording){stopVoice();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('Chrome browser vaapra voice sathi!');return;}
+  recognition=new SR();
+  recognition.continuous=false;recognition.interimResults=true;recognition.lang=langLocale;
+  recognition.onstart=()=>{
+    isRecording=true;
+    document.getElementById('micBtn').classList.add('recording');
+    document.getElementById('micBtn').textContent='🔴';
+    document.getElementById('voiceStatus').classList.add('active');
+  };
+  recognition.onresult=e=>{
+    let interim='',final='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t=e.results[i][0].transcript;
+      if(e.results[i].isFinal)final+=t;else interim+=t;
+    }
+    const disp=final||interim;
+    document.getElementById('userInput').value=disp;
+    document.getElementById('voiceText').textContent=disp?`"${disp.substring(0,30)}..."`:'Bola... 👂';
+    autoResize(document.getElementById('userInput'));
+    if(final){stopVoice();setTimeout(()=>send(),350);}
+  };
+  recognition.onerror=e=>{stopVoice();};
+  recognition.onend=()=>{if(isRecording)stopVoice();};
+  recognition.start();
+}
+function stopVoice(){
+  isRecording=false;
+  if(recognition){try{recognition.stop();}catch(e){}recognition=null;}
+  document.getElementById('micBtn').classList.remove('recording');
+  document.getElementById('micBtn').textContent='🎤';
+  document.getElementById('voiceStatus').classList.remove('active');
+}
+
+// ══ SEND ══
+async function send(){
+  if(isLoading)return;
+  const input=document.getElementById('userInput');
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';input.style.height='';
+  isLoading=true;document.getElementById('sendBtn').disabled=true;
+  addMsg('user',mdToHtml(text));
+  addTyping();
+  try{
+    const reply=await callClaude(text);
+    removeTyping();addMsg('ai',mdToHtml(reply));
+  }catch(err){
+    removeTyping();history.pop();
+    addMsg('ai',`⚠️ <strong>Error:</strong> ${err.message}<br>Internet check kara!`);
+  }
+  isLoading=false;document.getElementById('sendBtn').disabled=false;
+}
+
+// Init
+if(!localStorage.getItem(AK)){const ck=getKeyFromCookie();if(ck)localStorage.setItem(AK,ck);}
+loadKey();
+</script>
+</body>
+</html>
