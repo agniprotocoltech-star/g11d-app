@@ -248,19 +248,19 @@ textarea#inp::placeholder{color:var(--text-dim);}
     <text x="256" y="490" font-family="Arial,sans-serif" font-size="12" text-anchor="middle" letter-spacing="3" fill="#4a5568">ULTIMATE AI</text>
   </svg>
 
-  <div class="setup-title">G11D.ai Setup</div>
-  <div class="setup-sub">Tumcha Anthropic API Key enter kara — ek vela enter keli ki app fully working hoel! 🔥</div>
+  <div class="setup-title">G11D.ai Setup 🔥</div>
+  <div class="setup-sub">Tumcha <strong>FREE Gemini API Key</strong> enter kara — No card needed! aistudio.google.com var milel 🎉</div>
 
   <input class="setup-input" type="password" id="apiKeyInput"
-    placeholder="sk-ant-api03-xxxxxxxxxxxxxxxx..."
+    placeholder="AIzaSy... (Gemini API Key)"
     autocomplete="off" autocorrect="off" spellcheck="false"/>
 
   <button class="setup-btn" onclick="saveApiKey()">🚀 G11D.ai Start Kara</button>
 
   <div class="setup-note">
-    API Key: <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> var milel<br>
-    Key tumhachya phone madhe <strong>safe store</strong> hote (localStorage)<br>
-    Koni bhi baher pathvat nahi — 100% private! 🔒
+    API Key: <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a> var milel<br>
+    <strong>100% FREE</strong> — No card, no payment needed! 🎉<br>
+    Key tumhachya phone madhe safe store hote — 100% private! 🔒
   </div>
   <div class="setup-skip" onclick="skipSetup()">Demo mode madhe open kara (AI work nahi kanar)</div>
 </div>
@@ -824,14 +824,18 @@ function buildMemSummary(){
 async function callClaude(msg){
   MEM.history.push({role:'user',content:msg});
   const trimmed=MEM.history.slice(-20);
-  const res=await fetch('https://api.anthropic.com/v1/messages',{
+  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${STORED_API_KEY}`,{
     method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':STORED_API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:buildSystem(),messages:trimmed})
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      systemInstruction:{parts:[{text:buildSystem()}]},
+      contents:trimmed.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]})),
+      generationConfig:{maxOutputTokens:1000,temperature:0.9}
+    })
   });
-  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'API error '+res.status);}
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'Gemini API error '+res.status);}
   const data=await res.json();
-  const reply=data.content?.map(b=>b.text||'').join('')||'...';
+  const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'...';
   MEM.history.push({role:'assistant',content:reply});
   return reply;
 }
@@ -919,14 +923,14 @@ function loadApiKey(){
 }
 function saveApiKey(){
   const key=document.getElementById('apiKeyInput').value.trim();
-  if(!key||!key.startsWith('sk-ant')){
-    showToast('⚠️ Valid API key enter kara! (sk-ant- ne suru hote)');
+  if(!key||!key.startsWith('AIza')){
+    showToast('⚠️ Valid Gemini API key enter kara! (AIza... ne suru hote)');
     return;
   }
   STORED_API_KEY=key;
   localStorage.setItem(API_KEY_STORE,key);
   document.getElementById('setupScreen').classList.add('hidden');
-  showToast('✅ API Key saved! G11D.ai ready! 🔥');
+  showToast('✅ Gemini API Key saved! G11D.ai ready! 🔥');
 }
 function skipSetup(){
   document.getElementById('setupScreen').classList.add('hidden');
