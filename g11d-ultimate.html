@@ -598,7 +598,7 @@ async function callAI(msg){
       'X-Title':'G11D.ai Ultimate AI'
     },
     body:JSON.stringify({
-      model:'mistralai/mistral-7b-instruct:free',
+      model:'openrouter/auto',
       messages:[{role:'system',content:buildSystem()},...trimmed],
       max_tokens:1000,
       temperature:0.9
