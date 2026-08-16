@@ -824,26 +824,44 @@ function buildMemSummary(){
 async function callClaude(msg){
   MEM.history.push({role:'user',content:msg});
   const trimmed=MEM.history.slice(-20);
-  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${STORED_API_KEY}`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      systemInstruction:{parts:[{text:buildSystem()}]},
-      contents:trimmed.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]})),
-      generationConfig:{maxOutputTokens:1000,temperature:0.9}
-    })
+  // AQ key = new Google AI Studio format, needs v1beta
+  const endpoints=[
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${STORED_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${STORED_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${STORED_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${STORED_API_KEY}`,
+  ];
+
+  const body=JSON.stringify({
+    contents:trimmed.map(m=>({
+      role:m.role==='assistant'?'model':'user',
+      parts:[{text:m.content}]
+    })),
+    systemInstruction:{parts:[{text:buildSystem()}]},
+    generationConfig:{maxOutputTokens:1000,temperature:0.9}
   });
+
+  let res, data, lastErrMsg='';
+  for(const url of endpoints){
+    try{
+      res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body});
+      data=await res.json();
+      if(res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) break;
+      lastErrMsg=data?.error?.message||'Model not available';
+      res=null;
+    }catch(e){lastErrMsg=e.message;}
+  }
+
+  if(!res||!data){
+    throw new Error('Sare models fail zhale: '+lastErrMsg);
+  }
   if(!res.ok){
-    const e=await res.json().catch(()=>({}));
-    const errMsg=e.error?.message||'Gemini API error '+res.status;
-    // If key invalid, show setup screen again
-    if(res.status===400||res.status===403){
+    if(data?.error?.code===403||data?.error?.status==='PERMISSION_DENIED'){
       document.getElementById('setupScreen').classList.remove('hidden');
       showToast('⚠️ API Key invalid! Navi key enter kara.');
     }
-    throw new Error(errMsg);
+    throw new Error(data?.error?.message||'Gemini error');
   }
-  const data=await res.json();
   const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'...';
   MEM.history.push({role:'assistant',content:reply});
   return reply;
