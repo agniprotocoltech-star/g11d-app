@@ -252,7 +252,7 @@ textarea#inp::placeholder{color:var(--text-dim);}
   <div class="setup-sub">Tumcha <strong>FREE Gemini API Key</strong> enter kara — No card needed! aistudio.google.com var milel 🎉</div>
 
   <input class="setup-input" type="password" id="apiKeyInput"
-    placeholder="AIzaSy... (Gemini API Key)"
+    placeholder="AIza... ya AQ... Gemini API Key paste kara"
     autocomplete="off" autocorrect="off" spellcheck="false"/>
 
   <button class="setup-btn" onclick="saveApiKey()">🚀 G11D.ai Start Kara</button>
@@ -833,7 +833,16 @@ async function callClaude(msg){
       generationConfig:{maxOutputTokens:1000,temperature:0.9}
     })
   });
-  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'Gemini API error '+res.status);}
+  if(!res.ok){
+    const e=await res.json().catch(()=>({}));
+    const errMsg=e.error?.message||'Gemini API error '+res.status;
+    // If key invalid, show setup screen again
+    if(res.status===400||res.status===403){
+      document.getElementById('setupScreen').classList.remove('hidden');
+      showToast('⚠️ API Key invalid! Navi key enter kara.');
+    }
+    throw new Error(errMsg);
+  }
   const data=await res.json();
   const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'...';
   MEM.history.push({role:'assistant',content:reply});
@@ -923,14 +932,14 @@ function loadApiKey(){
 }
 function saveApiKey(){
   const key=document.getElementById('apiKeyInput').value.trim();
-  if(!key||!key.startsWith('AIza')){
-    showToast('⚠️ Valid Gemini API key enter kara! (AIza... ne suru hote)');
+  if(!key||key.length<10){
+    showToast('⚠️ Valid API key enter kara!');
     return;
   }
   STORED_API_KEY=key;
   localStorage.setItem(API_KEY_STORE,key);
   document.getElementById('setupScreen').classList.add('hidden');
-  showToast('✅ Gemini API Key saved! G11D.ai ready! 🔥');
+  showToast('✅ API Key saved! G11D.ai ready! 🔥');
 }
 function skipSetup(){
   document.getElementById('setupScreen').classList.add('hidden');
