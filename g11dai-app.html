@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#7c3aed">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="G11D.ai">
+<title>G11D.ai — Ultimate AI Assistant</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{
+  --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;--border:#2a2a3d;
+  --accent:#7c3aed;--accent2:#06b6d4;--green:#10b981;--red:#ef4444;--amber:#f59e0b;
+  --text:#e2e8f0;--text-dim:#64748b;--text-hi:#f8fafc;
+  --bai:#1e1e2e;--buser:#2d1b69;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;display:flex;flex-direction:column;height:100dvh;}
+body::before{content:'';position:fixed;top:-40%;left:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(124,58,237,0.1) 0%,transparent 70%);pointer-events:none;z-index:0;animation:drift 8s ease-in-out infinite alternate;}
+@keyframes drift{from{transform:translate(0,0)}to{transform:translate(30px,20px)}}
+@keyframes orbP{0%,100%{box-shadow:0 0 14px rgba(124,58,237,0.4);}50%{box-shadow:0 0 26px rgba(124,58,237,0.7);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes tDot{0%,80%,100%{transform:scale(0.7);opacity:0.4}40%{transform:scale(1);opacity:1}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes vP{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+@keyframes wave{0%,100%{transform:scaleY(0.4)}50%{transform:scaleY(1)}}
+
+/* ── AUTH SCREENS ── */
+.auth-screen{
+  position:fixed;inset:0;z-index:9000;
+  background:linear-gradient(135deg,#0a0a0f 0%,#1a0533 50%,#0a1628 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;gap:0;overflow-y:auto;
+}
+.auth-screen.hidden{display:none;}
+.auth-logo{width:80px;height:80px;margin-bottom:16px;}
+.auth-title{font-size:28px;font-weight:900;background:linear-gradient(135deg,#a78bfa,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:1px;margin-bottom:4px;}
+.auth-sub{font-size:13px;color:var(--text-dim);margin-bottom:24px;text-align:center;max-width:300px;}
+.auth-card{background:rgba(18,18,26,0.9);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:380px;backdrop-filter:blur(12px);}
+.auth-tabs{display:flex;gap:0;margin-bottom:20px;background:var(--bg3);border-radius:10px;padding:4px;}
+.auth-tab{flex:1;padding:8px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;text-align:center;border:none;background:transparent;color:var(--text-dim);transition:all 0.2s;font-family:'Nunito',sans-serif;}
+.auth-tab.active{background:var(--accent);color:#fff;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:11px;font-weight:800;color:var(--text-dim);letter-spacing:0.5px;display:block;margin-bottom:5px;text-transform:uppercase;}
+.form-input{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:9px;padding:11px 14px;color:var(--text-hi);font-family:'Nunito',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(124,58,237,0.1);}
+.form-input::placeholder{color:var(--text-dim);}
+.auth-btn{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:9px;padding:13px;color:#fff;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+.auth-btn:hover{transform:scale(1.02);box-shadow:0 0 20px rgba(124,58,237,0.4);}
+.auth-err{font-size:12px;color:var(--red);text-align:center;padding:8px;background:rgba(239,68,68,0.08);border-radius:7px;border:1px solid rgba(239,68,68,0.2);display:none;}
+.auth-err.show{display:block;}
+.divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--text-dim);font-size:12px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── PRICING MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
+.modal-title{font-size:20px;font-weight:900;color:var(--text-hi);margin-bottom:4px;}
+.modal-sub{font-size:13px;color:var(--text-dim);margin-bottom:20px;}
+.plan-grid{display:flex;flex-direction:column;gap:10px;}
+.plan-card{background:var(--bg3);border:1.5px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all 0.2s;position:relative;}
+.plan-card:hover,.plan-card.selected{border-color:var(--accent);background:rgba(124,58,237,0.07);}
+.plan-card.popular{border-color:var(--accent);}
+.plan-badge{position:absolute;top:-10px;right:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:8px;}
+.plan-name{font-size:13px;font-weight:800;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.plan-price-row{display:flex;align-items:baseline;gap:4px;margin-bottom:6px;}
+.plan-price-inr{font-size:24px;font-weight:900;color:var(--text-hi);}
+.plan-price-usd{font-size:14px;color:var(--text-dim);}
+.plan-price-mo{font-size:12px;color:var(--text-dim);}
+.plan-features{font-size:12px;color:var(--text-dim);line-height:1.6;}
+.plan-features span{color:var(--green);}
+.pay-btn{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:9px;padding:13px;color:#fff;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:16px;transition:all 0.2s;}
+.pay-btn:hover{transform:scale(1.02);}
+.close-modal{float:right;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;margin-top:-4px;}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;gap:8px;padding:9px 13px;background:rgba(18,18,26,0.96);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;z-index:10;}
+.logo-text{font-size:17px;font-weight:900;letter-spacing:1px;background:linear-gradient(135deg,#a78bfa,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:8px;color:var(--text-dim);font-weight:700;}
+.clock-t{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent2);letter-spacing:1px;}
+.clock-d{font-size:8px;color:var(--text-dim);}
+.topbar-right{margin-left:auto;display:flex;gap:5px;align-items:center;}
+.tbtn{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:10px;color:var(--text-dim);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;transition:all 0.2s;white-space:nowrap;}
+.tbtn:hover{border-color:var(--accent);color:var(--accent);}
+.tbtn.upgrade{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;}
+.user-pill{display:flex;align-items:center;gap:5px;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);border-radius:16px;padding:3px 10px;font-size:10px;color:#a78bfa;font-weight:700;}
+.plan-badge-small{font-size:8px;background:var(--accent);color:#fff;padding:1px 5px;border-radius:4px;font-weight:800;}
+.msg-counter{font-size:9px;color:var(--text-dim);font-family:'JetBrains Mono',monospace;}
+
+/* ── CHIPS ── */
+.chips{display:flex;gap:5px;overflow-x:auto;padding:7px 12px;flex-shrink:0;border-bottom:1px solid var(--border);background:rgba(18,18,26,0.7);scrollbar-width:none;z-index:5;position:relative;}
+.chips::-webkit-scrollbar{display:none;}
+.chip{display:inline-flex;align-items:center;gap:3px;white-space:nowrap;padding:4px 10px;border-radius:16px;border:1px solid var(--border);background:var(--bg3);font-size:10px;font-weight:700;color:var(--text-dim);cursor:pointer;transition:all 0.2s;flex-shrink:0;}
+.chip:hover,.chip.active{border-color:var(--accent);color:var(--accent);background:rgba(124,58,237,0.1);}
+
+/* ── MESSAGES ── */
+.messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1;}
+.messages::-webkit-scrollbar{width:3px;}
+.messages::-webkit-scrollbar-thumb{background:var(--border);}
+.welcome{text-align:center;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;animation:fadeIn 0.5s ease;}
+.w-orb{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 0 34px rgba(124,58,237,0.5);animation:orbP 3s ease-in-out infinite;}
+.w-title{font-size:19px;font-weight:900;color:var(--text-hi);}
+.w-dt{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);border-radius:6px;padding:4px 12px;}
+.w-sub{font-size:12px;color:var(--text-dim);line-height:1.6;max-width:320px;}
+.qgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%;max-width:420px;}
+.qcard{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 7px;cursor:pointer;transition:all 0.2s;text-align:center;}
+.qcard:hover{border-color:var(--accent);background:rgba(124,58,237,0.06);transform:translateY(-1px);}
+.qcard-i{font-size:18px;margin-bottom:3px;}
+.qcard-t{font-size:10px;font-weight:800;color:var(--text-hi);}
+.qcard-s{font-size:9px;color:var(--text-dim);}
+.limit-banner{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:10px 14px;text-align:center;font-size:12px;color:var(--amber);display:none;}
+.limit-banner.show{display:block;}
+.limit-banner button{background:var(--accent);border:none;border-radius:6px;padding:5px 14px;color:#fff;font-size:11px;font-weight:800;cursor:pointer;margin-top:6px;font-family:'Nunito',sans-serif;}
+.datediv{text-align:center;margin:2px 0;}
+.datediv span{font-size:9px;color:var(--text-dim);background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:2px 10px;}
+.msg{display:flex;gap:8px;max-width:90%;animation:msgIn 0.3s ease;}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.msg.ai{align-self:flex-start;}
+.msg-av{width:27px;height:27px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.msg.ai .msg-av{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 0 8px rgba(124,58,237,0.3);}
+.msg.user .msg-av{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:11px;font-weight:900;}
+.msg-body{display:flex;flex-direction:column;gap:2px;max-width:calc(100% - 35px);}
+.msg-name{font-size:9px;font-weight:700;color:var(--text-dim);padding:0 3px;}
+.msg.user .msg-name{text-align:right;}
+.bubble{padding:9px 12px;border-radius:11px;font-size:13px;line-height:1.65;}
+.msg.ai .bubble{background:var(--bai);border:1px solid var(--border);color:var(--text);border-top-left-radius:2px;}
+.msg.user .bubble{background:var(--buser);border:1px solid rgba(124,58,237,0.25);color:var(--text-hi);border-top-right-radius:2px;}
+.bubble strong{color:var(--text-hi);}
+.bubble code{font-family:'JetBrains Mono',monospace;background:rgba(124,58,237,0.13);padding:1px 5px;border-radius:3px;font-size:11px;color:#a78bfa;}
+.bubble pre{background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;padding:9px;margin-top:6px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:#7dd3fc;line-height:1.5;}
+.bubble ul,.bubble ol{padding-left:15px;margin-top:3px;}
+.bubble li{margin-bottom:2px;}
+.bubble h3{color:var(--text-hi);margin:7px 0 3px;font-size:13px;}
+.msg-time{font-size:8px;color:var(--text-dim);padding:0 3px;font-family:'JetBrains Mono',monospace;}
+.msg.user .msg-time{text-align:right;}
+.typing{display:flex;gap:4px;align-items:center;padding:9px 12px;}
+.td{width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));animation:tDot 1.2s infinite;}
+.td:nth-child(2){animation-delay:0.15s;}.td:nth-child(3){animation-delay:0.3s;}
+
+/* ── BOOKING CARD ── */
+.bcard{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px;margin-top:8px;}
+.bcard-title{font-size:12px;font-weight:800;color:var(--text-hi);margin-bottom:8px;}
+.blinks{display:flex;flex-wrap:wrap;gap:5px;}
+.blink{padding:5px 11px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid;transition:all 0.2s;text-decoration:none;display:inline-block;font-family:'Nunito',sans-serif;}
+.blink:hover{transform:translateY(-1px);}
+.blink.p{background:rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.3);color:#a78bfa;}
+.blink.g{background:rgba(16,185,129,0.12);border-color:rgba(16,185,129,0.25);color:var(--green);}
+.blink.b{background:rgba(6,182,212,0.1);border-color:rgba(6,182,212,0.2);color:var(--accent2);}
+.blink.a{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.2);color:var(--amber);}
+
+/* ── INPUT ── */
+.input-area{padding:8px 12px 12px;background:rgba(18,18,26,0.96);border-top:1px solid var(--border);flex-shrink:0;z-index:10;position:relative;}
+.vs-bar{display:none;align-items:center;gap:6px;padding:5px 10px;margin-bottom:6px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:7px;font-size:10px;color:#fca5a5;font-weight:700;}
+.vs-bar.active{display:flex;}
+.vdot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:vP 1s infinite;}
+.vwaves{display:flex;gap:2px;align-items:center;height:12px;}
+.vw{width:2px;background:var(--red);border-radius:2px;animation:wave 0.8s ease-in-out infinite;}
+.vw:nth-child(1){height:4px}.vw:nth-child(2){height:9px;animation-delay:.1s}.vw:nth-child(3){height:6px;animation-delay:.2s}.vw:nth-child(4){height:11px;animation-delay:.3s}.vw:nth-child(5){height:4px;animation-delay:.4s}
+.vstop{margin-left:auto;background:rgba(239,68,68,0.13);border:1px solid rgba(239,68,68,0.25);border-radius:4px;padding:2px 7px;color:#fca5a5;font-size:9px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;}
+.irow{display:flex;gap:6px;align-items:flex-end;background:var(--bg3);border:1.5px solid var(--border);border-radius:12px;padding:7px 11px;transition:border-color 0.2s,box-shadow 0.2s;}
+.irow:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px rgba(124,58,237,0.1);}
+.ibtn{background:none;border:none;font-size:16px;cursor:pointer;opacity:0.45;transition:all 0.2s;padding:2px;flex-shrink:0;}
+.ibtn:hover{opacity:1;}
+.ibtn.rec{opacity:1;animation:vP 0.8s infinite;}
+textarea#inp{flex:1;background:none;border:none;outline:none;color:var(--text-hi);font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;resize:none;line-height:1.5;max-height:100px;caret-color:var(--accent);}
+textarea#inp::placeholder{color:var(--text-dim);}
+.sbtn{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 0 10px rgba(124,58,237,0.3);transition:all 0.2s;flex-shrink:0;color:#fff;}
+.sbtn:hover{transform:scale(1.06);}
+.sbtn:disabled{opacity:0.3;cursor:not-allowed;transform:none;}
+.ifooter{display:flex;justify-content:center;margin-top:5px;font-size:9px;color:var(--text-dim);font-weight:600;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:68px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--bg2);border:1px solid var(--accent);border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;color:var(--accent);z-index:200;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;max-width:92vw;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:480px){.msg{max-width:96%;}.qgrid{grid-template-columns:repeat(3,1fr);}.clock-d{display:none;}}
+</style>
+</head>
+<body>
+
+<!-- ══ AUTH SCREEN ══ -->
+<div class="auth-screen" id="authScreen">
+  <svg class="auth-logo" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="a1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1a0533"/><stop offset="100%" style="stop-color:#0a1628"/></linearGradient>
+      <linearGradient id="a2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#00ff88"/><stop offset="100%" style="stop-color:#00bfff"/></linearGradient>
+      <linearGradient id="a3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#a78bfa"/><stop offset="100%" style="stop-color:#22d3ee"/></linearGradient>
+      <filter id="a4"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <rect width="512" height="512" rx="100" fill="url(#a1)"/>
+    <path d="M256 65 L375 112 L375 225 Q375 305 256 365 Q137 305 137 225 L137 112 Z" fill="rgba(124,58,237,0.15)" stroke="url(#a2)" stroke-width="2.5" filter="url(#a4)"/>
+    <g transform="translate(256,205)" filter="url(#a4)">
+      <path d="M-18,-58 C-68,-58 -88,-28 -83,2 L-18,72 L-18,-58 Z" fill="none" stroke="url(#a3)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M18,-58 C68,-58 88,-28 83,2 L18,72 L18,-58 Z" fill="none" stroke="url(#a3)" stroke-width="5" stroke-linecap="round"/>
+      <line x1="0" y1="-58" x2="0" y2="72" stroke="url(#a2)" stroke-width="2.5" stroke-dasharray="7,5"/>
+      <circle cx="-58" cy="2" r="5" fill="#00ff88" filter="url(#a4)"/>
+      <circle cx="58" cy="2" r="5" fill="#00bfff" filter="url(#a4)"/>
+    </g>
+    <text x="256" y="418" font-family="Arial Black,sans-serif" font-size="72" font-weight="900" text-anchor="middle" letter-spacing="6" fill="url(#a2)" filter="url(#a4)">G11D</text>
+    <text x="256" y="458" font-family="Arial,sans-serif" font-size="28" font-weight="700" text-anchor="middle" letter-spacing="8" fill="#a78bfa">.ai</text>
+  </svg>
+  <div class="auth-title">G11D.ai</div>
+  <div class="auth-sub">India's smartest AI — Marathi, Hindi, English + 100 languages 🙏</div>
+
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login',this)">Login</button>
+      <button class="auth-tab" onclick="switchTab('register',this)">Register</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div class="auth-err" id="loginErr"></div>
+      <button class="auth-btn" onclick="doLogin()">🚀 Login</button>
+      <div class="divider">or</div>
+      <button class="auth-btn" style="background:var(--bg3);border:1px solid var(--border);color:var(--text-dim);" onclick="demoMode()">Try Demo (limited)</button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="registerForm" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" id="regName" placeholder="Ganpat Darade">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="regEmail" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="regPass" placeholder="Min 6 characters" autocomplete="new-password">
+      </div>
+      <div class="auth-err" id="regErr"></div>
+      <button class="auth-btn" onclick="doRegister()">✅ Create Free Account</button>
+      <div style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:10px;">Free: 20 messages/day • No credit card needed</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRICING MODAL ══ -->
+<div class="modal-bg" id="pricingModal">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <div class="modal-title">🔥 Upgrade G11D.ai</div>
+      <button class="close-modal" onclick="closePricing()">✕</button>
+    </div>
+    <div class="modal-sub">Unlimited AI — India's most affordable!</div>
+    <div class="plan-grid">
+      <div class="plan-card" onclick="selectPlan('free')">
+        <div class="plan-name">Free</div>
+        <div class="plan-price-row"><div class="plan-price-inr">₹0</div><div class="plan-price-mo">/month</div></div>
+        <div class="plan-features"><span>✅</span> 20 messages/day<br><span>✅</span> All languages<br><span>✅</span> Voice input</div>
+      </div>
+      <div class="plan-card popular" onclick="selectPlan('basic')">
+        <div class="plan-name">Basic</div>
+        <div class="plan-price-row"><div class="plan-price-inr">₹299</div><div class="plan-price-usd">~$3.59</div><div class="plan-price-mo">/month</div></div>
+        <div class="plan-features"><span>✅</span> 200 messages/day<br><span>✅</span> Memory system<br><span>✅</span> Booking engine</div>
+      </div>
+      <div class="plan-card popular" onclick="selectPlan('pro')">
+        <div class="plan-badge">🔥 Most Popular</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price-row"><div class="plan-price-inr">₹499</div><div class="plan-price-usd">~$5.99</div><div class="plan-price-mo">/month</div></div>
+        <div class="plan-features"><span>✅</span> Unlimited messages<br><span>✅</span> All features<br><span>✅</span> Security AI access<br><span>✅</span> Priority support</div>
+      </div>
+      <div class="plan-card" onclick="selectPlan('premium')">
+        <div class="plan-name">Premium</div>
+        <div class="plan-price-row"><div class="plan-price-inr">₹999</div><div class="plan-price-usd">~$11.99</div><div class="plan-price-mo">/month</div></div>
+        <div class="plan-features"><span>✅</span> Unlimited + Priority<br><span>✅</span> VIP support<br><span>✅</span> Early features</div>
+      </div>
+    </div>
+    <button class="pay-btn" id="payBtn" onclick="initiatePayment()">💳 Pay with Razorpay</button>
+    <div style="font-size:10px;color:var(--text-dim);text-align:center;margin-top:8px;">🔒 Secure payment · 7-day refund guarantee · UPI/Cards/NetBanking</div>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div class="topbar">
+  <svg width="30" height="30" viewBox="0 0 512 512" style="border-radius:8px;flex-shrink:0;">
+    <defs>
+      <linearGradient id="t1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1a0533"/><stop offset="100%" style="stop-color:#0a1628"/></linearGradient>
+      <linearGradient id="t2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#00ff88"/><stop offset="100%" style="stop-color:#00bfff"/></linearGradient>
+      <linearGradient id="t3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#a78bfa"/><stop offset="100%" style="stop-color:#22d3ee"/></linearGradient>
+    </defs>
+    <rect width="512" height="512" rx="100" fill="url(#t1)"/>
+    <path d="M256 65 L375 112 L375 225 Q375 305 256 365 Q137 305 137 225 L137 112 Z" fill="rgba(124,58,237,0.15)" stroke="url(#t2)" stroke-width="3"/>
+    <g transform="translate(256,205)">
+      <path d="M-18,-58 C-68,-58 -88,-28 -83,2 L-18,72 L-18,-58 Z" fill="none" stroke="url(#t3)" stroke-width="6" stroke-linecap="round"/>
+      <path d="M18,-58 C68,-58 88,-28 83,2 L18,72 L18,-58 Z" fill="none" stroke="url(#t3)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="0" y1="-58" x2="0" y2="72" stroke="url(#t2)" stroke-width="3" stroke-dasharray="8,5"/>
+      <circle cx="-58" cy="2" r="6" fill="#00ff88"/>
+      <circle cx="58" cy="2" r="6" fill="#00bfff"/>
+    </g>
+    <text x="256" y="430" font-family="Arial Black,sans-serif" font-size="80" font-weight="900" text-anchor="middle" fill="url(#t2)">G11D</text>
+  </svg>
+  <div style="margin-left:4px;">
+    <div class="logo-text">G11D.ai</div>
+    <div class="logo-sub">ULTIMATE AI</div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:center;margin:0 4px;">
+    <div class="clock-t" id="ct">--:--:--</div>
+    <div class="clock-d" id="cd"></div>
+  </div>
+  <div class="topbar-right">
+    <div class="user-pill" id="userPill">
+      <span id="userInitial">?</span>
+      <span class="plan-badge-small" id="planBadge">FREE</span>
+    </div>
+    <span class="msg-counter" id="msgCounter"></span>
+    <button class="tbtn upgrade" onclick="openPricing()">⚡ Upgrade</button>
+    <button class="tbtn" id="langBtn" onclick="cycleLang()">🌍</button>
+    <button class="tbtn" onclick="doLogout()">↩</button>
+  </div>
+</div>
+
+<div class="chips">
+  <div class="chip active" onclick="setMode('general',this)">🌟 All</div>
+  <div class="chip" onclick="setMode('booking',this)">🏨 Booking</div>
+  <div class="chip" onclick="setMode('travel',this)">✈️ Travel</div>
+  <div class="chip" onclick="setMode('food',this)">🍽️ Food</div>
+  <div class="chip" onclick="setMode('security',this)">🛡️ Security</div>
+  <div class="chip" onclick="setMode('health',this)">🏃 Health</div>
+  <div class="chip" onclick="setMode('study',this)">📚 Study</div>
+  <div class="chip" onclick="setMode('work',this)">💼 Work</div>
+  <div class="chip" onclick="setMode('finance',this)">💰 Finance</div>
+  <div class="chip" onclick="setMode('fun',this)">😄 Fun</div>
+  <div class="chip" onclick="setMode('morning',this)">☀️ Morning</div>
+  <div class="chip" onclick="setMode('night',this)">🌙 Night</div>
+</div>
+
+<div class="messages" id="msgs">
+  <div class="limit-banner" id="limitBanner">
+    ⚠️ Daily limit reached! Upgrade to Pro for unlimited messages.
+    <br><button onclick="openPricing()">⚡ Upgrade Now — ₹499/month</button>
+  </div>
+  <div class="welcome" id="welcome">
+    <div class="w-orb">🧠</div>
+    <div class="w-title">Namaste! G11D.ai 🙏</div>
+    <div class="w-dt" id="wdt">📅 Loading...</div>
+    <div class="w-sub">Sakali uthlyapasun raatri jhopeparyant — har kaam madhe saath!<br>Marathi, Hindi, English — koni bhi bhashet bola!</div>
+    <div class="qgrid">
+      <div class="qcard" onclick="quickAsk('Hotel book kara maza sathi 🏨')"><div class="qcard-i">🏨</div><div class="qcard-t">Hotel</div><div class="qcard-s">Book now</div></div>
+      <div class="qcard" onclick="quickAsk('Train ticket book kara 🚆')"><div class="qcard-i">🚆</div><div class="qcard-t">Train</div><div class="qcard-s">IRCTC</div></div>
+      <div class="qcard" onclick="quickAsk('Flight book kara ✈️')"><div class="qcard-i">✈️</div><div class="qcard-t">Flight</div><div class="qcard-s">Best deals</div></div>
+      <div class="qcard" onclick="quickAsk('Bug hunting madhe help kara 🎯')"><div class="qcard-i">🛡️</div><div class="qcard-t">Security</div><div class="qcard-s">Bug hunting</div></div>
+      <div class="qcard" onclick="quickAsk('Aaj din plan kara ☀️')"><div class="qcard-i">☀️</div><div class="qcard-t">Day Plan</div><div class="qcard-s">Routine</div></div>
+      <div class="qcard" onclick="quickAsk('Movie ticket book kara 🎬')"><div class="qcard-i">🎬</div><div class="qcard-t">Movie</div><div class="qcard-s">BookMyShow</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="input-area">
+  <div class="vs-bar" id="vsBar">
+    <div class="vdot"></div>
+    <div class="vwaves"><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div></div>
+    <span id="vsTxt">Bola... 👂</span>
+    <button class="vstop" onclick="stopVoice()">■ Stop</button>
+  </div>
+  <div class="irow">
+    <button class="ibtn" id="micBtn" onclick="toggleVoice()">🎤</button>
+    <textarea id="inp" rows="1" placeholder="Kahi pan type kara ya bola — Marathi/Hindi/English..." onkeydown="hKey(event)" oninput="aResize(this)"></textarea>
+    <button class="sbtn" id="sbtn" onclick="send()">➤</button>
+  </div>
+  <div class="ifooter">g11dai.live · G11D.ai by AgniProtocol Tech · Ganpat Darade 🙏</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ CONFIG ══
+const API_BASE = 'https://g11dai.live/api'; // G11D backend
+const OR_KEY = ''; // OpenRouter key - set via VPS sed command
+const RZP_KEY = 'rzp_live_T5oR1rXGjjhaD4'; // Razorpay key
+
+// Plan limits
+const PLAN_LIMITS = {free:20, basic:200, pro:99999, premium:99999};
+const PLAN_PRICES = {basic:{inr:29900,name:'Basic ₹299'}, pro:{inr:49900,name:'Pro ₹499'}, premium:{inr:99900,name:'Premium ₹999'}};
+
+// ══ STATE ══
+let currentUser = null;
+let authToken = null;
+let mode = 'general';
+let history = [];
+let isLoading = false;
+let recognition = null;
+let isRec = false;
+let selectedPlan = 'pro';
+let msgUsed = 0;
+let msgLimit = 20;
+let lastDate = '';
+let langIndex = 0;
+const LANGS = ['🌍 Auto','🇮🇳 मराठी','🇮🇳 हिंदी','🇺🇸 English'];
+const LANG_LOCALES = ['mr-IN','mr-IN','hi-IN','en-US'];
+
+// ══ CLOCK ══
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function getDT(){const d=new Date(),p=n=>String(n).padStart(2,'0');return{time:`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`,date:`${DAYS[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`,h:d.getHours(),d};}
+function greet(h){return h<5?'Good Night 🌙':h<12?'Subh Sakal ☀️':h<17?'Afternoon 🌤️':h<20?'Evening 🌇':'Good Night 🌙';}
+function tick(){const{time,date,h}=getDT();document.getElementById('ct').textContent=time;document.getElementById('cd').textContent=date;const w=document.getElementById('wdt');if(w)w.textContent=`📅 ${date}  ·  🕐 ${time}  ·  ${greet(h)}`;}
+tick();setInterval(tick,1000);
+
+// ══ AUTH ══
+function switchTab(tab, el){
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('loginForm').style.display = tab==='login'?'block':'none';
+  document.getElementById('registerForm').style.display = tab==='register'?'block':'none';
+}
+
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginErr');
+  if(!email||!pass){err.textContent='Email aani password required!';err.classList.add('show');return;}
+  err.classList.remove('show');
+  try{
+    const r = await fetch(`${API_BASE}/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+    const d = await r.json();
+    if(!r.ok)throw new Error(d.error||'Login failed');
+    saveSession(d.token, d.user);
+    enterApp(d.user);
+  }catch(e){err.textContent=e.message;err.classList.add('show');}
+}
+
+async function doRegister(){
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const pass = document.getElementById('regPass').value;
+  const err = document.getElementById('regErr');
+  if(!name||!email||!pass){err.textContent='Sab fields bhara!';err.classList.add('show');return;}
+  if(pass.length<6){err.textContent='Password min 6 characters!';err.classList.add('show');return;}
+  err.classList.remove('show');
+  try{
+    const r = await fetch(`${API_BASE}/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password:pass})});
+    const d = await r.json();
+    if(!r.ok)throw new Error(d.error||'Registration failed');
+    saveSession(d.token, d.user);
+    enterApp(d.user);
+    showToast('✅ Welcome to G11D.ai! 🎉');
+  }catch(e){err.textContent=e.message;err.classList.add('show');}
+}
+
+function demoMode(){
+  const demoUser={name:'Demo User',email:'demo@g11dai.live',plan:'free',messages_today:0};
+  currentUser=demoUser; authToken='demo';
+  enterApp(demoUser);
+  showToast('Demo mode — 5 messages only!');
+}
+
+function saveSession(token, user){
+  localStorage.setItem('g11d_token',token);
+  localStorage.setItem('g11d_user',JSON.stringify(user));
+  authToken=token; currentUser=user;
+}
+
+function loadSession(){
+  const t=localStorage.getItem('g11d_token');
+  const u=localStorage.getItem('g11d_user');
+  if(t&&u){authToken=t;currentUser=JSON.parse(u);return true;}
+  return false;
+}
+
+function enterApp(user){
+  document.getElementById('authScreen').classList.add('hidden');
+  const plan=user.plan||'free';
+  msgLimit=PLAN_LIMITS[plan]||20;
+  msgUsed=user.messages_today||0;
+  document.getElementById('userInitial').textContent=(user.name||'U')[0].toUpperCase();
+  document.getElementById('planBadge').textContent=plan.toUpperCase();
+  updateMsgCounter();
+}
+
+function doLogout(){
+  localStorage.removeItem('g11d_token');
+  localStorage.removeItem('g11d_user');
+  currentUser=null; authToken=null; history=[];
+  document.getElementById('authScreen').classList.remove('hidden');
+  document.getElementById('msgs').innerHTML='<div class="welcome" id="welcome"><div class="w-orb">🧠</div><div class="w-title">Namaste! G11D.ai 🙏</div><div class="w-dt" id="wdt">📅 Loading...</div></div>';
+}
+
+function updateMsgCounter(){
+  const plan=currentUser?.plan||'free';
+  const lim=PLAN_LIMITS[plan];
+  if(lim>=99999){document.getElementById('msgCounter').textContent='∞';}
+  else{document.getElementById('msgCounter').textContent=`${msgUsed}/${lim}`;}
+  if(msgUsed>=lim&&lim<99999){
+    document.getElementById('limitBanner').classList.add('show');
+  }
+}
+
+// ══ PRICING ══
+function openPricing(){document.getElementById('pricingModal').classList.add('open');}
+function closePricing(){document.getElementById('pricingModal').classList.remove('open');}
+document.getElementById('pricingModal').addEventListener('click',function(e){if(e.target===this)closePricing();});
+function selectPlan(plan){
+  selectedPlan=plan;
+  document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  const btn=document.getElementById('payBtn');
+  if(plan==='free'){btn.textContent='✅ Continue with Free';btn.onclick=()=>closePricing();}
+  else{const p=PLAN_PRICES[plan];btn.textContent=`💳 Pay ${p?.name||''} with Razorpay`;btn.onclick=initiatePayment;}
+}
+
+async function initiatePayment(){
+  if(selectedPlan==='free'){closePricing();return;}
+  if(!PLAN_PRICES[selectedPlan]){showToast('Plan select kara!');return;}
+  try{
+    const r=await fetch(`${API_BASE}/create-order`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${authToken}`},
+      body:JSON.stringify({plan:selectedPlan})
+    });
+    const order=await r.json();
+    if(!r.ok)throw new Error(order.error||'Order failed');
+    const options={
+      key:RZP_KEY,
+      amount:order.amount,
+      currency:'INR',
+      name:'G11D.ai',
+      description:`${selectedPlan.toUpperCase()} Plan — Monthly`,
+      image:'https://g11dai.live/logo.png',
+      order_id:order.order_id,
+      handler:async(response)=>{
+        const vr=await fetch(`${API_BASE}/payment-success`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':`Bearer ${authToken}`},
+          body:JSON.stringify(response)
+        });
+        const vd=await vr.json();
+        if(vd.success){
+          currentUser.plan=selectedPlan;
+          msgLimit=PLAN_LIMITS[selectedPlan];
+          document.getElementById('planBadge').textContent=selectedPlan.toUpperCase();
+          localStorage.setItem('g11d_user',JSON.stringify(currentUser));
+          updateMsgCounter();
+          closePricing();
+          showToast(`🎉 ${selectedPlan.toUpperCase()} plan active!`);
+        }
+      },
+      prefill:{name:currentUser?.name||'',email:currentUser?.email||''},
+      theme:{color:'#7c3aed'}
+    };
+    const rzp=new Razorpay(options);
+    rzp.open();
+  }catch(e){showToast('⚠️ Payment error: '+e.message);}
+}
+
+// ══ HELPERS ══
+function aResize(el){el.style.height='';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+function hKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
+function setMode(m,el){mode=m;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
+function cycleLang(){langIndex=(langIndex+1)%LANGS.length;document.getElementById('langBtn').textContent=LANGS[langIndex];showToast('Language: '+LANGS[langIndex]);}
+function quickAsk(t){document.getElementById('inp').value=t;send();}
+function showToast(msg,dur=2600){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+
+// ══ BOOKING ══
+const BOOKINGS={
+  hotel:{t:'🏨 Hotel Booking',l:[{n:'MakeMyTrip',u:'https://www.makemytrip.com/hotels/',c:'p'},{n:'OYO',u:'https://www.oyorooms.com/',c:'g'},{n:'Booking.com',u:'https://www.booking.com/',c:'b'},{n:'Goibibo',u:'https://www.goibibo.com/hotels/',c:'a'}]},
+  flight:{t:'✈️ Flight Booking',l:[{n:'MakeMyTrip',u:'https://www.makemytrip.com/flights/',c:'p'},{n:'Skyscanner',u:'https://www.skyscanner.co.in/',c:'g'},{n:'Goibibo',u:'https://www.goibibo.com/flights/',c:'b'},{n:'EaseMyTrip',u:'https://www.easemytrip.com/',c:'a'}]},
+  train:{t:'🚆 Train Ticket',l:[{n:'IRCTC',u:'https://www.irctc.co.in/nget/train-search',c:'p'},{n:'RailYatri',u:'https://www.railyatri.in/',c:'g'},{n:'ConfirmTkt',u:'https://www.confirmtkt.com/',c:'b'}]},
+  bus:{t:'🚌 Bus Ticket',l:[{n:'redBus',u:'https://www.redbus.in/',c:'p'},{n:'AbhiBus',u:'https://www.abhibus.com/',c:'g'},{n:'MSRTC',u:'https://msrtcreservation.com/',c:'b'}]},
+  movie:{t:'🎬 Movie Ticket',l:[{n:'BookMyShow',u:'https://in.bookmyshow.com/',c:'p'},{n:'PVR',u:'https://www.pvrcinemas.com/',c:'g'},{n:'INOX',u:'https://www.inoxmovies.com/',c:'b'}]},
+};
+function detectBooking(msg){
+  const m=msg.toLowerCase();
+  if(m.includes('hotel')||m.includes('stay'))return'hotel';
+  if(m.includes('flight')||m.includes('plane'))return'flight';
+  if(m.includes('train')||m.includes('irctc'))return'train';
+  if(m.includes('bus'))return'bus';
+  if(m.includes('movie')||m.includes('cinema'))return'movie';
+  return null;
+}
+function bookingCard(type){
+  const b=BOOKINGS[type];if(!b)return'';
+  return`<div class="bcard"><div class="bcard-title">${b.t}</div><div class="blinks">${b.l.map(l=>`<a href="${l.u}" target="_blank" class="blink ${l.c}">${l.n}</a>`).join('')}</div></div>`;
+}
+
+// ══ MESSAGES ══
+function hideWelcome(){const w=document.getElementById('welcome');if(w)w.remove();}
+function maybeDate(){
+  const today=`${DAYS[new Date().getDay()]}, ${new Date().getDate()} ${MONTHS[new Date().getMonth()]} ${new Date().getFullYear()}`;
+  if(lastDate!==today){lastDate=today;const m=document.getElementById('msgs');const d=document.createElement('div');d.className='datediv';d.innerHTML=`<span>📅 ${today}</span>`;m.appendChild(d);}
+}
+function addMsg(role,html,extra){
+  hideWelcome();maybeDate();
+  const msgs=document.getElementById('msgs');
+  const div=document.createElement('div');div.className=`msg ${role}`;
+  const{time}=getDT();
+  const av=role==='ai'?'🧠':(currentUser?.name||'U')[0].toUpperCase();
+  const name=role==='ai'?'G11D AI':(currentUser?.name||'You');
+  div.innerHTML=`<div class="msg-av">${av}</div><div class="msg-body"><div class="msg-name">${name}</div><div class="bubble">${html}${extra||''}</div><div class="msg-time">🕐 ${time}</div></div>`;
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+function addTyping(){
+  hideWelcome();const msgs=document.getElementById('msgs');
+  const div=document.createElement('div');div.className='msg ai';div.id='typin';
+  div.innerHTML=`<div class="msg-av">🧠</div><div class="msg-body"><div class="msg-name">G11D AI</div><div class="bubble"><div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div></div></div>`;
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+function removeTyping(){const t=document.getElementById('typin');if(t)t.remove();}
+function mdToHtml(t){
+  return t.replace(/```[\w]*\n?([\s\S]*?)```/g,'<pre>$1</pre>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/^#{1,3}\s(.+)$/gm,'<h3>$1</h3>').replace(/^[-•]\s(.+)$/gm,'<li>$1</li>').replace(/(<li>.*<\/li>)+/gs,m=>`<ul>${m}</ul>`).replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
+}
+
+// ══ SYSTEM PROMPT ══
+const MODES={
+  general:'Help with ANYTHING — no limits. All life topics.',
+  booking:'Hotel, Flight, Train, Bus, Movie booking — best platforms, tips',
+  travel:'Trip planning, itinerary, visa, packing, budget travel',
+  food:'Recipes, restaurants, delivery, cooking tips, diet',
+  security:'Bug bounty, ethical hacking, IDOR, XSS, WAF bypass, pentesting. Authorized use only.',
+  health:'Fitness, diet, yoga, meditation, mental health, home remedies',
+  study:'All subjects, exam prep, homework, memory techniques',
+  work:'Productivity, coding, debugging, professional writing, business',
+  finance:'Budgeting, investing, mutual funds, tax, startup finance',
+  fun:'Jokes, stories, games, trivia, casual chat',
+  morning:'Day planning, morning routine, breakfast, motivation, energy',
+  night:'Wind-down, reflection, tomorrow planning, relaxation, sleep',
+};
+function buildSystem(){
+  const{date,h,d}=getDT();
+  return`You are G11D AI — ultimate personal AI assistant by AgniProtocol Tech (Ganpat Darade, Maharashtra, India). Available at g11dai.live.
+
+DATE/TIME: ${date} | ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')} | ${greet(h)} | ${DAYS[d.getDay()]}
+USER: ${currentUser?.name||'Guest'} | Plan: ${currentUser?.plan||'free'}
+MODE: ${MODES[mode]||MODES.general}
+
+LANGUAGE: Always detect and reply in exact same language/mix as user. Marathi→Marathi, Hindi→Hindi, Mixed→same mix. Never switch unless user switches.
+
+PERSONALITY: Warm caring best friend. Smart but simple. Use emojis naturally. For Ganpat Darade (security researcher): know he builds GanpatAI, G11D.ai, does bug bounty on HackerOne/Bugcrowd/Google VRP.
+
+Always be helpful, encouraging, and accurate. Weave date/time naturally when relevant.`;
+}
+
+// ══ AI CALL ══
+async function callAI(msg){
+  history.push({role:'user',content:msg});
+  const trimmed=history.slice(-16);
+  // Use backend if token available, else OpenRouter directly
+  let reply;
+  if(authToken&&authToken!=='demo'){
+    try{
+      const r=await fetch(`${API_BASE}/chat`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${authToken}`},
+        body:JSON.stringify({message:msg,history:trimmed.slice(0,-1),mode,system:buildSystem()})
+      });
+      if(r.status===429){
+        // Limit reached
+        document.getElementById('limitBanner').classList.add('show');
+        throw new Error('Limit reached');
+      }
+      const d=await r.json();
+      if(!r.ok)throw new Error(d.error||'Backend error');
+      reply=d.reply;
+      msgUsed=d.messages_used||msgUsed+1;
+      updateMsgCounter();
+    }catch(e){
+      if(e.message==='Limit reached')throw e;
+      // Fallback to direct OpenRouter
+      reply=await callOpenRouter(trimmed);
+    }
+  }else{
+    reply=await callOpenRouter(trimmed);
+  }
+  history.push({role:'assistant',content:reply});
+  return reply;
+}
+
+async function callOpenRouter(msgs){
+  const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${OR_KEY}`,'HTTP-Referer':'https://g11dai.live','X-Title':'G11D.ai'},
+    body:JSON.stringify({model:'openrouter/auto',messages:[{role:'system',content:buildSystem()},...msgs],max_tokens:1000,temperature:0.9})
+  });
+  if(!r.ok)throw new Error('AI error '+r.status);
+  const d=await r.json();
+  return d.choices?.[0]?.message?.content||'...';
+}
+
+// ══ VOICE ══
+function toggleVoice(){
+  if(isRec){stopVoice();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('Chrome browser vaapra voice sathi!');return;}
+  recognition=new SR();
+  recognition.continuous=false;recognition.interimResults=true;
+  recognition.lang=LANG_LOCALES[langIndex]||'mr-IN';
+  recognition.onstart=()=>{isRec=true;document.getElementById('micBtn').classList.add('rec');document.getElementById('micBtn').textContent='🔴';document.getElementById('vsBar').classList.add('active');};
+  recognition.onresult=e=>{
+    let fin='',int='';
+    for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=t;else int+=t;}
+    const disp=fin||int;
+    document.getElementById('inp').value=disp;
+    document.getElementById('vsTxt').textContent=disp?`"${disp.substring(0,30)}..."`:'Bola... 👂';
+    aResize(document.getElementById('inp'));
+    if(fin){stopVoice();setTimeout(()=>send(),350);}
+  };
+  recognition.onerror=()=>stopVoice();
+  recognition.onend=()=>{if(isRec)stopVoice();};
+  recognition.start();
+}
+function stopVoice(){
+  isRec=false;if(recognition){try{recognition.stop();}catch(e){}recognition=null;}
+  document.getElementById('micBtn').classList.remove('rec');document.getElementById('micBtn').textContent='🎤';
+  document.getElementById('vsBar').classList.remove('active');
+}
+
+// ══ SEND ══
+async function send(){
+  if(isLoading)return;
+  const input=document.getElementById('inp');
+  const text=input.value.trim();
+  if(!text)return;
+  // Check limit for demo
+  if(authToken==='demo'&&msgUsed>=5){openPricing();return;}
+  input.value='';input.style.height='';
+  isLoading=true;document.getElementById('sbtn').disabled=true;
+  addMsg('user',mdToHtml(text));
+  addTyping();
+  const bType=detectBooking(text);
+  let bCard=bType?bookingCard(bType):'';
+  try{
+    const reply=await callAI(text);
+    removeTyping();
+    addMsg('ai',mdToHtml(reply),bCard);
+    if(authToken==='demo')msgUsed++;
+  }catch(err){
+    removeTyping();
+    if(err.message!=='Limit reached'){
+      history.pop();
+      addMsg('ai',`⚠️ <strong>Error:</strong> ${err.message}`);
+    }
+  }
+  isLoading=false;document.getElementById('sbtn').disabled=false;
+}
+
+// ══ RAZORPAY LOAD ══
+function loadRazorpay(){
+  const s=document.createElement('script');
+  s.src='https://checkout.razorpay.com/v1/checkout.js';
+  document.head.appendChild(s);
+}
+
+// ══ INIT ══
+loadRazorpay();
+if(loadSession()){
+  enterApp(currentUser);
+}
+// PWA Manifest
+const MFT={name:"G11D.ai — Ultimate AI",short_name:"G11D.ai",start_url:"./",display:"standalone",background_color:"#0a0a0f",theme_color:"#7c3aed"};
+const mb=new Blob([JSON.stringify(MFT)],{type:'application/json'});
+const ml=document.createElement('link');ml.rel='manifest';ml.href=URL.createObjectURL(mb);
+document.head.appendChild(ml);
+</script>
+</body>
+</html>
