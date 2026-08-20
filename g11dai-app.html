@@ -222,20 +222,16 @@ textarea#inp::placeholder{color:var(--text-dim);}
         <label class="form-label">Password</label>
         <input type="password" class="form-input" id="loginPass" placeholder="••••••••" autocomplete="current-password">
       </div>
-      <div style="text-align:right;margin-top:-8px;margin-bottom:8px;">
-        <span onclick="showForgot()" style="font-size:11px;color:var(--accent2);cursor:pointer;font-weight:700;">Forgot Password?</span>
-      </div>
       <div class="auth-err" id="loginErr"></div>
       <button class="auth-btn" onclick="doLogin()">🚀 Login</button>
-      <div class="divider">or</div>
-      <button class="auth-btn" style="background:var(--bg3);border:1px solid var(--border);color:var(--text-dim);" onclick="demoMode()">Try Demo (limited)</button>
+
     </div>
 
     <!-- FORGOT PASSWORD FORM -->
     <div id="forgotForm" style="display:none;">
       <div style="text-align:center;margin-bottom:16px;">
         <div style="font-size:16px;font-weight:900;color:var(--text-hi);margin-bottom:4px;">🔐 Reset Password</div>
-        <div style="font-size:12px;color:var(--text-dim);">Email var OTP pathavla jaail</div>
+        <div style="font-size:12px;color:var(--text-dim);">OTP tumchya email var pathavla jaail</div>
       </div>
       <div class="form-group">
         <label class="form-label">Email</label>
@@ -254,7 +250,7 @@ textarea#inp::placeholder{color:var(--text-dim);}
       <div class="auth-err" id="forgotErr"></div>
       <button class="auth-btn" id="forgotBtn" onclick="doForgot()">📧 Send OTP</button>
       <div style="text-align:center;margin-top:10px;">
-        <span onclick="showLogin()" style="font-size:12px;color:var(--accent2);cursor:pointer;font-weight:700;">← Back to Login</span>
+        <span onclick="switchTab('login',document.querySelector('.auth-tab'))" style="font-size:12px;color:var(--accent2);cursor:pointer;font-weight:700;">← Back to Login</span>
       </div>
     </div>
 
@@ -449,46 +445,42 @@ function switchTab(tab, el){
   document.getElementById('registerForm').style.display = tab==='register'?'block':'none';
 }
 
+
+let forgotStep = 'email';
 function showForgot(){
-  document.getElementById('loginForm').style.display='none';
+  ['loginForm','registerForm','forgotForm'].forEach(id=>{
+    var el=document.getElementById(id);
+    if(el)el.style.display='none';
+  });
   document.getElementById('forgotForm').style.display='block';
-  document.getElementById('registerForm').style.display='none';
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
 }
-function showLogin(){
-  document.getElementById('loginForm').style.display='block';
-  document.getElementById('forgotForm').style.display='none';
-  document.getElementById('registerForm').style.display='none';
-}
-let forgotStep = 'email'; // email or otp
 async function doForgot(){
-  const err = document.getElementById('forgotErr');
+  const err=document.getElementById('forgotErr');
   err.classList.remove('show');
   if(forgotStep==='email'){
-    const email = document.getElementById('forgotEmail').value.trim();
+    const email=document.getElementById('forgotEmail').value.trim();
     if(!email){err.textContent='Email enter kara!';err.classList.add('show');return;}
     try{
-      const r=await fetch(,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
-      const d=await r.json();
-      // Always show OTP step (security - don't reveal if email exists)
+      await fetch(API_BASE+'/auth/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
       document.getElementById('forgotOtpSection').style.display='block';
       document.getElementById('forgotEmail').disabled=true;
       document.getElementById('forgotBtn').textContent='✅ Reset Password';
       forgotStep='otp';
       showToast('📧 OTP pathavla! Email check kara!');
     }catch(e){err.textContent='Error: '+e.message;err.classList.add('show');}
-  } else {
+  }else{
     const email=document.getElementById('forgotEmail').value.trim();
     const otp=document.getElementById('forgotOtp').value.trim();
     const newPass=document.getElementById('forgotNewPass').value;
     if(!otp||!newPass){err.textContent='OTP aani nava password bhara!';err.classList.add('show');return;}
-    if(newPass.length<6){err.textContent='Password min 6 characters!';err.classList.add('show');return;}
     try{
-      const r=await fetch(,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,otp,new_password:newPass})});
+      const r=await fetch(API_BASE+'/auth/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,otp,new_password:newPass})});
       const d=await r.json();
       if(!r.ok)throw new Error(d.error||d.detail||'Reset failed');
-      showToast('✅ Password reset zala! Login kara!');
+      showToast('✅ Password reset! Login kara!');
       forgotStep='email';
-      showLogin();
+      switchTab('login',document.querySelector('.auth-tab'));
     }catch(e){err.textContent=e.message;err.classList.add('show');}
   }
 }
